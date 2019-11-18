@@ -13,8 +13,8 @@ import java.math.RoundingMode;
 public class Panel extends JPanel {
 
 
-    Vector2d center = new Vector2d(0, 0);
-    Vector2d scale = new Vector2d(2, 2);
+    protected Vector2d center = new Vector2d(0, 0);
+    protected Vector2d scale = new Vector2d(2, 2);
 
     protected Vector2d toScreenSpace(Vector2d vector2d) {
         return new Vector2d(
@@ -116,10 +116,14 @@ public class Panel extends JPanel {
         int power = (int) Math.floor(Math.log10(scale.getX())) - 1;
         double w_x = Math.pow(10, power);
 
-        double start_x = Math.floor((center.getX() - scale.getX() / 2) / w_x) * w_x;
-        double start_y = Math.floor((center.getY() - scale.getY() / 2) / w_x) * w_x;
-        double end_x = Math.floor((center.getX() + scale.getX() / 2) / w_x) * w_x + w_x;
-        double end_y = Math.floor((center.getY() + scale.getY() / 2) / w_x) * w_x + w_x;
+        double start_x = Math.floor((toWorldSpace(new Vector2d(0,0)).getX()) / w_x) * w_x;
+        double end_y = Math.floor((toWorldSpace(new Vector2d(0,0)).getY()) / w_x) * w_x;
+
+        double end_x = Math.floor((toWorldSpace(new Vector2d(this.getWidth(),this.getHeight())).getX()) / w_x) * w_x;
+        double start_y = Math.floor((toWorldSpace(new Vector2d(this.getWidth(),this.getHeight())).getY()) / w_x) * w_x;
+
+//        double end_x = Math.floor((center.getX() + scale.getX() / 2) / w_x) * w_x + w_x;
+//        double end_y = Math.floor((center.getY() + scale.getY() / 2) / w_x) * w_x + w_x;
 
         Stroke dashed = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 1, new float[]{1}, 0);
         Stroke full = new BasicStroke(2);
