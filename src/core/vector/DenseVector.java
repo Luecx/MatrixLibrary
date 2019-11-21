@@ -5,6 +5,8 @@ import core.exceptions.NotEnoughSlotsException;
 import core.exceptions.NotMatchingSlotsException;
 import core.matrix.dense.DenseMatrix;
 
+import java.util.Arrays;
+
 public class DenseVector extends Vector<DenseVector> {
 
     private double[] values;
@@ -14,7 +16,7 @@ public class DenseVector extends Vector<DenseVector> {
         super(size);
     }
 
-    public DenseVector(double... values){
+    public DenseVector(double... values) {
         super(values.length);
         this.values = values;
     }
@@ -32,84 +34,9 @@ public class DenseVector extends Vector<DenseVector> {
         values = new double[this.getSize()];
     }
 
-
-
     @Override
     public void setValue(int index, double val) {
         values[index] = val;
-    }
-
-
-    @Override
-    public DenseVector self_negate() {
-        for(int i = 0; i < this.getSize(); i++){
-            values[i] = -values[i];
-        }
-        return this;
-    }
-
-    @Override
-    public DenseVector self_add(DenseVector other) {
-        if(other.getSize() != this.getSize()) throw new NotMatchingSlotsException(this.getSize(), other.getSize());
-        for(int i = 0; i < this.getSize(); i++){
-            this.setValue(i, this.getValue(i) + other.getValue(i));
-        }
-        return this;
-    }
-
-    @Override
-    public DenseVector self_sub(DenseVector other) {
-        if(other.getSize() != this.getSize()) throw new NotMatchingSlotsException(this.getSize(), other.getSize());
-        for(int i = 0; i < this.getSize(); i++){
-            this.setValue(i, this.getValue(i) - other.getValue(i));
-        }
-        return this;
-    }
-
-    @Override
-    public DenseVector self_scale(double factor) {
-        for(int i = 0; i < this.getSize(); i++){
-            values[i] *= factor;
-        }
-        return this;
-    }
-
-    @Override
-    public DenseVector negate() {
-        DenseVector result = new DenseVector(this.getSize());
-        for(int i = 0; i < this.getSize(); i++){
-            result.setValue(i, -this.getValue(i));
-        }
-        return result;
-    }
-
-    @Override
-    public DenseVector sub(DenseVector other) {
-        if(other.getSize() != this.getSize()) throw new NotMatchingSlotsException(this.getSize(), other.getSize());
-        DenseVector result = new DenseVector(this.getSize());
-        for(int i = 0; i < this.getSize(); i++){
-            result.setValue(i, this.getValue(i) - other.getValue(i));
-        }
-        return result;
-    }
-
-    @Override
-    public DenseVector add(DenseVector other) {
-        if(other.getSize() != this.getSize()) throw new NotMatchingSlotsException(this.getSize(), other.getSize());
-        DenseVector result = new DenseVector(this.getSize());
-        for(int i = 0; i < this.getSize(); i++){
-            result.setValue(i, this.getValue(i) + other.getValue(i));
-        }
-        return result;
-    }
-
-    @Override
-    public DenseVector scale(double factor) {
-        DenseVector result = new DenseVector(this.getSize());
-        for(int i = 0; i < this.getSize(); i++){
-            result.setValue(i, values[i] * factor);
-        }
-        return result;
     }
 
     @Override
@@ -118,44 +45,75 @@ public class DenseVector extends Vector<DenseVector> {
     }
 
     @Override
-    public double innerProduct(DenseVector other) {
-        if(other.getSize() != this.getSize()) throw new NotMatchingSlotsException(this.getSize(), other.getSize());
-        double sum = 0;
-        for(int i = 0; i < this.getSize(); i++){
-            sum += other.getValue(i) * values[i];
+    protected void scale_partial(DenseVector target, double scalar, int start, int end) {
+        for (int i = start; i < end; i++) {
+            target.setValue(i, getValue(i) * scalar);
         }
-        return sum;
     }
 
     @Override
-    public double length() {
-        double g = 0;
-        for(double v:values){
-            g += v * v;
+    protected void negate_partial(DenseVector target, int start, int end) {
+        for (int i = start; i < end; i++) {
+            target.setValue(i, -getValue(i));
         }
-        return Math.sqrt(g);
+    }
+
+    @Override
+    protected void add_partial(DenseVector target, DenseVector other, int start, int end) {
+        for (int i = start; i < end; i++) {
+            target.setValue(i, other.getValue(i) + getValue(i));
+        }
+    }
+
+    @Override
+    protected void sub_partial(DenseVector target, DenseVector other, int start, int end) {
+        for (int i = start; i < end; i++) {
+            target.setValue(i, getValue(i) - other.getValue(i));
+        }
+    }
+
+    @Override
+    protected double dot_partial(DenseVector other, int start, int end) {
+        double k = 0;
+        for (int i = start; i < end; i++) {
+            k += getValue(i) * other.getValue(i);
+        }
+        return k;
+    }
+
+    @Override
+    protected void outerProduct_partial(DenseMatrix target, DenseVector other, int row) {
+        if(this.getValue(row) != 0){
+            for(int n = 0; n < other.getSize(); n++){
+                target.setValue(row,n,this.getValue(row) * other.getValue(n));
+            }
+        }
+    }
+
+    @Override
+    protected void hadamard_partial(DenseVector target, DenseVector other, int start, int end) {
+        for (int i = start; i < end; i++) {
+            target.setValue(i, getValue(i) * other.getValue(i));
+        }
+    }
+
+    @Override
+    public DenseVector copy() {
+        return new DenseVector(Arrays.copyOf(this.values, this.values.length));
+    }
+
+    @Override
+    public DenseVector newInstance() {
+        return new DenseVector(this.values.length);
     }
 
     @Override
     public String toString() {
         String s = "[";
-        for(double v:values){
-            s += " " + String.format("%.3E",v);
+        for (double v : values) {
+            s += " " + String.format("%.3E", v);
         }
-        return s+"]";
-    }
-
-    @Override
-    public DenseMatrix outerProduct(DenseVector other) {
-        if(other.getSize() != this.getSize()) throw new NotMatchingSlotsException(this.getSize(), other.getSize());
-        DenseMatrix matrix = new DenseMatrix(this.getSize(), this.getSize());
-        for(int i = 0; i < this.getSize(); i++){
-            for(int n = 0; n < this.getSize(); n++){
-                matrix.setValue(i,n, this.getValue(i) * other.getValue(n));
-            }
-        }
-
-        return matrix;
+        return s + "]";
     }
 
     public double[] getValues() {

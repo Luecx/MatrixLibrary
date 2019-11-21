@@ -2,16 +2,22 @@ package core.matrix.dense;
 
 import core.exceptions.NotSupportedOperation;
 import core.matrix.Matrix;
+import core.matrix.sparse_matrix.HashMatrix;
+import core.matrix.sparse_matrix.SparseMatrix;
+import core.solver.Utilities;
 import core.solver.decomposition.QRDecomposition;
+import core.solver.direct.Solver;
+import core.threads.Pool;
 import core.vector.DenseVector;
 import core.vector.Vector;
 
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class DenseMatrix extends Matrix<DenseMatrix> {
 
     private double[][] values;
-    protected boolean transpose_tag = false;
 
 
     public DenseMatrix(int m, int n) {
@@ -29,10 +35,6 @@ public class DenseMatrix extends Matrix<DenseMatrix> {
         }
     }
 
-    public DenseMatrix setTransposeTag(boolean tag) {
-        this.transpose_tag = tag;
-        return this;
-    }
 
     public DenseMatrix randomise(double lower, double upper) {
         for (int i = 0; i < this.getM(); i++) {
@@ -41,21 +43,58 @@ public class DenseMatrix extends Matrix<DenseMatrix> {
             }
         }
         return this;
-
     }
 
 
     @Override
+    protected void mul_partial_row(DenseVector target, Vector<?> vec, int row) {
+        double v = 0;
+        for (int i = 0; i < this.getN(); i++) {
+            v += getValue(row, i) * vec.getValue(i);
+        }
+        vec.setValue(row, v);
+    }
+
+    @Override
+    protected void mul_partial_row(DenseMatrix target, Matrix<?> matrix, int row) {
+        for (int j = 0; j < matrix.getN(); j++) {
+            double sum = 0;
+            for (int k = 0; k < this.getN(); k++) {
+                sum += getValue(row, k) * matrix.getValue(k, j);
+            }
+            target.setValue(row, j, sum);
+        }
+    }
+
+    @Override
+    protected void add_partial_row(DenseMatrix target, DenseMatrix matrix, int row) {
+        for (int i = 0; i < this.getN(); i++) {
+            target.setValue(row, i, target.getValue(row, i) + matrix.getValue(row, i));
+        }
+    }
+
+    @Override
+    protected void sub_partial_row(DenseMatrix target, DenseMatrix matrix, int row) {
+        for (int i = 0; i < this.getN(); i++) {
+            target.setValue(row, i, target.getValue(row, i) - matrix.getValue(row, i));
+        }
+    }
+
+    @Override
+    protected void scale_partial_row(DenseMatrix target, double scalar, int row) {
+        for (int i = 0; i < this.getN(); i++) {
+            target.setValue(row, i, this.getValue(row, i) * scalar);
+        }
+    }
+
+    @Override
     public DenseMatrix transpose() {
-
         DenseMatrix mat = new DenseMatrix(this.getN(), this.getM());
-
         for (int i = 0; i < this.getM(); i++) {
             for (int j = 0; j < this.getN(); j++) {
                 mat.setValue(j, i, this.getValue(i, j));
             }
         }
-
         return mat;
     }
 
@@ -69,7 +108,7 @@ public class DenseMatrix extends Matrix<DenseMatrix> {
 
     @Override
     public DenseMatrix self_transpose() {
-        if(this.getM() != this.getN()) throw new RuntimeException();
+        if (this.getM() != this.getN()) throw new RuntimeException();
         for (int i = 0; i < this.getM(); i++) {
             for (int j = 0; j < i; j++) {
                 double v = this.getValue(i, j);
@@ -77,122 +116,7 @@ public class DenseMatrix extends Matrix<DenseMatrix> {
                 this.setValue(j, i, v);
             }
         }
-
         return this;
-    }
-
-    @Override
-    public DenseMatrix mul(Matrix<?> matrix) {
-        DenseMatrix m = new DenseMatrix(this.getM(), matrix.getN());
-        for (int i = 0; i < this.getM(); i++) {
-            for (int j = 0; j < matrix.getN(); j++) {
-                double sum = 0;
-                for (int k = 0; k < this.getN(); k++) {
-                    sum += getValue(i, k) * matrix.getValue(k, j);
-                }
-                m.setValue(i, j, sum);
-            }
-        }
-        return m;
-    }
-
-    @Override
-    public DenseVector mul(Vector<?> vec) {
-        if (vec.getSize() != this.getN()) throw new RuntimeException();
-
-
-        DenseVector denseVector = new DenseVector(this.getM());
-
-        for (int i = 0; i < this.getM(); i++) {
-            double sum = 0;
-            for (int n = 0; n < this.getN(); n++) {
-                sum += getValue(i, n) * vec.getValue(n);
-            }
-            denseVector.setValue(i, sum);
-        }
-        return denseVector;
-
-    }
-
-    @Override
-    public void swapRow(int r1, int row2) {
-        throw new NotSupportedOperation();
-    }
-
-    @Override
-    public void sawpColumn(int c1, int c2) {
-        throw new NotSupportedOperation();
-    }
-
-    @Override
-    public void scale(double scalar) {
-        for (int i = 0; i < this.getM(); i++) {
-            for (int n = 0; n < this.getN(); n++) {
-                values[i][n] *= scalar;
-            }
-        }
-    }
-
-    @Override
-    public void scale_column(int column, double scalar) {
-        throw new NotSupportedOperation();
-    }
-
-    @Override
-    public void scale_row(int column, double scalar) {
-        throw new NotSupportedOperation();
-    }
-
-    @Override
-    public void setValue(int m, int n, double value) {
-        values[m][n] = value;
-    }
-
-    @Override
-    public double getValue(int m, int n) {
-        return transpose_tag ? values[n][m] : values[m][n];
-    }
-
-    @Override
-    public boolean hasValue(double v) {
-        throw new NotSupportedOperation();
-    }
-
-    @Override
-    public void replaceValue(double v, double r) {
-        throw new NotSupportedOperation();
-    }
-
-    @Override
-    public DenseMatrix add(DenseMatrix matrix) {
-        DenseMatrix res = new DenseMatrix(this.getM(), this.getN());
-        for (int i = 0; i < this.getM(); i++) {
-            for (int n = 0; n < this.getN(); n++) {
-                res.setValue(i, n, this.getValue(i, n) + matrix.getValue(i, n));
-            }
-        }
-        return res;
-    }
-
-    @Override
-    public DenseMatrix sub(DenseMatrix matrix) {
-        DenseMatrix res = new DenseMatrix(this.getM(), this.getN());
-        for (int i = 0; i < this.getM(); i++) {
-            for (int n = 0; n < this.getN(); n++) {
-                res.setValue(i, n, this.getValue(i, n) - matrix.getValue(i, n));
-            }
-        }
-        return res;
-    }
-
-    @Override
-    public DenseMatrix copy() {
-        return new DenseMatrix(this.values);
-    }
-
-    @Override
-    public DenseMatrix copyToDense() {
-        return new DenseMatrix(this.values);
     }
 
     @Override
@@ -235,11 +159,89 @@ public class DenseMatrix extends Matrix<DenseMatrix> {
         return true;
     }
 
+
+    @Override
+    public void swapRow(int r1, int row2) {
+        for(int i = 0; i < this.getM(); i++){
+            double a = getValue(r1,i);
+            setValue(r1,i,getValue(row2,i));
+            setValue(row2,i,a);
+        }
+    }
+
+    @Override
+    public void swapColumn(int c1, int c2) {
+        for(int i = 0; i < this.getN(); i++){
+            double a = getValue(i,c1);
+            setValue(i,c1,getValue(i,c2));
+            setValue(i,c2,a);
+        }    }
+
+    @Override
+    public void scale_column(int column, double scalar) {
+        for (int i = 0; i < this.getN(); i++) {
+            this.setValue(i, column, this.getValue(i, column) * scalar);
+        }
+    }
+
+    @Override
+    public void scale_row(int row, double scalar) {
+        scale_partial_row(this, scalar, row);
+    }
+
+    @Override
+    public void setValue(int m, int n, double value) {
+        values[m][n] = value;
+    }
+
+    @Override
+    public double getValue(int m, int n) {
+        return values[m][n];
+    }
+
+    @Override
+    public boolean hasValue(double v) {
+        for (int i = 0; i < this.getM(); i++) {
+            for (int n = 0; n < this.getN(); n++) {
+                if (values[i][n] == v) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void replaceValue(double v, double r) {
+        for (int i = 0; i < this.getM(); i++) {
+            for (int n = 0; n < this.getN(); n++) {
+                if (values[i][n] == v) {
+                    values[i][n] = r;
+                }
+            }
+        }
+    }
+
+    @Override
+    public DenseMatrix copy() {
+        return new DenseMatrix(this.values);
+    }
+
+    @Override
+    public DenseMatrix copyToDense() {
+        return new DenseMatrix(this.values);
+    }
+
+    @Override
+    public DenseMatrix newInstance() {
+        return new DenseMatrix(this.getM(), this.getN());
+    }
+
+
     @Override
     public double determinant() {
         if (this.getN() != this.getM()) return 0;
         QRDecomposition qr = QRDecomposition.givens(this);
-
         double det = 1;
         for (int i = 0; i < qr.getR().getN(); i++) {
             det *= qr.getR().getValue(i, i);
@@ -262,7 +264,6 @@ public class DenseMatrix extends Matrix<DenseMatrix> {
             }
             s += "\n";
         }
-
         return s;
     }
 
@@ -275,7 +276,6 @@ public class DenseMatrix extends Matrix<DenseMatrix> {
             }
             s += "\n";
         }
-
         return s;
     }
 
@@ -289,5 +289,24 @@ public class DenseMatrix extends Matrix<DenseMatrix> {
 
     public double[][] getValues() {
         return values;
+    }
+
+
+    public static void main(String[] args) {
+        DenseMatrix mat1 = new DenseMatrix(200, 200);
+        mat1.randomise(0, 1);
+        DenseMatrix mat2 = new DenseMatrix(200, 200);
+        mat2.randomise(0, 1);
+        Utilities.measureCores(8, new BiConsumer<Pool, Integer>() {
+            @Override
+            public void accept(Pool pool, Integer v) {
+                if (v == 0) {
+                    mat1.mul(mat2);
+                } else {
+                    pool.setActiveCores(v);
+                    mat1.mul(mat2, pool);
+                }
+            }
+        }, 50);
     }
 }

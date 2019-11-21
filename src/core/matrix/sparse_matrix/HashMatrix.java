@@ -11,8 +11,6 @@ import java.util.Objects;
 
 public class HashMatrix extends Matrix<HashMatrix> {
 
-    private static final int hash_factor = (int)Math.sqrt(Integer.MAX_VALUE);
-
     private HashMap<Integer, Double>[] rows;
 
     public HashMatrix(int m, int n) {
@@ -41,83 +39,151 @@ public class HashMatrix extends Matrix<HashMatrix> {
     }
 
     @Override
+    protected void mul_partial_row(DenseVector target, Vector<?> vec, int row) {
+        double v = 0;
+        for (int i = 0; i < this.getN(); i++) {
+            v += getValue(row, i) * vec.getValue(i);
+        }
+        vec.setValue(row, v);
+    }
+
+    @Override
+    protected void mul_partial_row(DenseMatrix target, Matrix<?> matrix, int row) {
+        for (int j = 0; j < matrix.getN(); j++) {
+            double sum = 0;
+            for (int k = 0; k < this.getN(); k++) {
+                sum += getValue(row, k) * matrix.getValue(k, j);
+            }
+            target.setValue(row, j, sum);
+        }
+    }
+
+    @Override
+    protected void add_partial_row(HashMatrix target, HashMatrix matrix, int row) {
+        for (int i = 0; i < this.getN(); i++) {
+            target.setValue(row, i, target.getValue(row, i) + matrix.getValue(row, i));
+        }
+    }
+
+    @Override
+    protected void sub_partial_row(HashMatrix target, HashMatrix matrix, int row) {
+        for (int i = 0; i < this.getN(); i++) {
+            target.setValue(row, i, target.getValue(row, i) - matrix.getValue(row, i));
+        }
+    }
+
+    @Override
+    protected void scale_partial_row(HashMatrix target, double scalar, int row) {
+        for(Integer i:rows[row].keySet()){
+            this.rows[row].put(i, this.rows[row].get(i) * scalar);
+        }
+    }
+
+    @Override
     public double determinant() {
         throw new NotSupportedOperation();
     }
 
     @Override
-    public DenseVector mul(Vector<?> vec) {
-        throw new NotSupportedOperation();
-    }
-
-    @Override
-    public DenseMatrix mul(Matrix<?> matrix) {
-        throw new NotSupportedOperation();
-    }
-
-    @Override
-    public HashMatrix add(HashMatrix matrix) {
-        throw new NotSupportedOperation();
-    }
-
-    @Override
-    public HashMatrix sub(HashMatrix matrix) {
-        throw new NotSupportedOperation();
-    }
-
-    @Override
     public HashMatrix transpose() {
-        throw new NotSupportedOperation();
-    }
-
-    @Override
-    public HashMatrix self_transpose() {
-        throw new NotSupportedOperation();
+        HashMatrix mat = new HashMatrix(this.getN(), this.getM());
+        for (int i = 0; i < this.getM(); i++) {
+            for (int j = 0; j < this.getN(); j++) {
+                mat.setValue(j, i, this.getValue(i, j));
+            }
+        }
+        return mat;
     }
 
     @Override
     public HashMatrix self_identity() {
-        throw new NotSupportedOperation();
+        for (int i = 0; i < Math.min(this.getM(), this.getN()); i++) {
+            setValue(i,i,1);
+        }
+        return this;
+    }
+
+    @Override
+    public HashMatrix self_transpose() {
+        if (this.getM() != this.getN()) throw new RuntimeException();
+        for (int i = 0; i < this.getM(); i++) {
+            for (int j = 0; j < i; j++) {
+                double v = this.getValue(i, j);
+                this.setValue(i, j, this.getValue(j, i));
+                this.setValue(j, i, v);
+            }
+        }
+        return this;
     }
 
     @Override
     public double norm_1() {
-        throw new NotSupportedOperation();
+        double max = 0;
+        double sum;
+        for (int i = 0; i < this.getM(); i++) {
+            sum = 0;
+            for (int n = 0; n < this.getN(); n++) {
+                sum += Math.abs(getValue(i, n));
+            }
+            if (sum > max) max = sum;
+        }
+        return max;
     }
 
     @Override
     public double norm_infinity() {
-        throw new NotSupportedOperation();
+        double max = 0;
+        double sum;
+        for (int i = 0; i < this.getN(); i++) {
+            sum = 0;
+            for (int n = 0; n < this.getM(); n++) {
+                sum += Math.abs(getValue(n, i));
+            }
+            if (sum > max) max = sum;
+        }
+        return max;
     }
 
     @Override
     public boolean isSymmetric() {
-        throw new NotSupportedOperation();
+        for (int i = 0; i < this.getN(); i++) {
+            for (int n = 0; n < i; n++) {
+                if (getValue(i,n) != getValue(n,i)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
+
 
     @Override
     public void swapRow(int r1, int row2) {
-        throw new NotSupportedOperation();
+        for(int i = 0; i < this.getM(); i++){
+            double a = getValue(r1,i);
+            setValue(r1,i,getValue(row2,i));
+            setValue(row2,i,a);
+        }
     }
 
     @Override
-    public void sawpColumn(int c1, int c2) {
-        throw new NotSupportedOperation();
-    }
-
-    @Override
-    public void scale(double scalar) {
-        throw new NotSupportedOperation();
-    }
+    public void swapColumn(int c1, int c2) {
+        for(int i = 0; i < this.getN(); i++){
+            double a = getValue(i,c1);
+            setValue(i,c1,getValue(i,c2));
+            setValue(i,c2,a);
+        }    }
 
     @Override
     public void scale_column(int column, double scalar) {
-        throw new NotSupportedOperation();
+        for (int i = 0; i < this.getN(); i++) {
+            this.setValue(i, column, this.getValue(i, column) * scalar);
+        }
     }
 
     @Override
-    public void scale_row(int column, double scalar) {
-        throw new NotSupportedOperation();
+    public void scale_row(int row, double scalar) {
+        scale_partial_row(this, scalar, row);
     }
 
     @Override
@@ -174,6 +240,11 @@ public class HashMatrix extends Matrix<HashMatrix> {
             s += m.size();
         }
         return s;
+    }
+
+    @Override
+    public HashMatrix newInstance() {
+        return new HashMatrix(this.getM(), this.getN());
     }
 
     public static void main(String[] args) {

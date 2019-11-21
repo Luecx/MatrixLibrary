@@ -4,12 +4,17 @@ import core.matrix.Matrix;
 import core.matrix.dense.DenseMatrix;
 import core.matrix.sparse_matrix.HashMatrix;
 import core.matrix.sparse_matrix.SparseMatrix;
+import core.solver.direct.Solver;
+import core.threads.Pool;
 import core.vector.DenseVector;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class Utilities {
 
@@ -152,8 +157,41 @@ public class Utilities {
         }
     }
 
+    public static void measureCores(int max_cores, BiConsumer<Pool, Integer> func, int count){
+        Pool pool = new Pool(max_cores);
+        for(int i = 0; i <= max_cores; i++){
+            double totalTime = 0;
+            for(int n = 0; n < count; n++){
+                long time = System.currentTimeMillis();
+                synchronized (func){
+                    func.accept(pool,i);
+                }
+                totalTime += System.currentTimeMillis()-time;
+            }
+
+            System.out.println("cores: " + i +"   time: " + totalTime / 20);
+        }
+        pool.stop();
+    }
+
     public static void main(String[] args) {
-        measure(5000, DenseMatrix.class, SparseMatrix.class, HashMatrix.class);
+        //measure(5000, DenseMatrix.class, SparseMatrix.class, HashMatrix.class);
+
+        HashMatrix hash = generateSymmetricPositiveDefiniteMatrix(HashMatrix.class, 300000,1230);
+        SparseMatrix matrix = new SparseMatrix(hash);
+        DenseVector vector = new DenseVector(300000);
+        vector.randomise(0,1);
+
+        long t = System.currentTimeMillis();
+        for(int i = 0; i < 100; i++){
+            //Solver.precon_conjugate_gradient(matrix, vector, new DenseVector(vector.getSize()));
+            Solver.conjugate_gradient(matrix, vector, new DenseVector(vector.getSize()));
+
+        }
+        System.out.println(System.currentTimeMillis()-t);
+
+        //Solver.conjugate_gradient(matrix, vector);
+
     }
 
 }

@@ -1,6 +1,7 @@
 package core.vector;
 
 import core.matrix.dense.DenseMatrix;
+import core.threads.Pool;
 
 public class Vector3d extends Vector<Vector3d> {
 
@@ -45,7 +46,6 @@ public class Vector3d extends Vector<Vector3d> {
         }
     }
 
-
     @Override
     public Vector3d self_negate() {
         this.x = -x;
@@ -79,6 +79,14 @@ public class Vector3d extends Vector<Vector3d> {
     }
 
     @Override
+    public Vector3d self_hadamard(Vector3d other) {
+        this.x *= other.x;
+        this.y *= other.y;
+        this.z *= other.z;
+        return this;
+    }
+
+    @Override
     public Vector3d scale(double factor) {
         return new Vector3d(this.x * factor, factor * this.y, factor * this.z);
     }
@@ -99,7 +107,7 @@ public class Vector3d extends Vector<Vector3d> {
     }
 
     @Override
-    public double innerProduct(Vector3d other) {
+    public double dot(Vector3d other) {
         return this.x * other.x + this.y * other.y + this.z * other.z;
     }
 
@@ -118,6 +126,12 @@ public class Vector3d extends Vector<Vector3d> {
                 this.x * other.y - this.y * other.x
         );
     }
+
+    @Override
+    public Vector3d hadamard(Vector3d other) {
+        return new Vector3d(x *other.x, y * other.y, z * other.z);
+    }
+
 
     @Override
     public double length() {
@@ -159,6 +173,117 @@ public class Vector3d extends Vector<Vector3d> {
                 ", y=" + y +
                 ", z=" + z +
                 '}';
+    }
+
+
+    @Override
+    public Vector3d copy() {
+        return new Vector3d(x,y,z);
+    }
+
+    @Override
+    public Vector3d newInstance() {
+        return new Vector3d();
+    }
+
+    @Override
+    public double length(Pool pool) {
+        return length();
+    }
+
+    @Override
+    public DenseMatrix outerProduct(Vector3d other, Pool pool) {
+        return outerProduct(other);
+    }
+
+    @Override
+    public Vector3d add(Vector3d other, Pool pool) {
+        return add(other);
+    }
+
+    @Override
+    public Vector3d sub(Vector3d other, Pool pool) {
+        return sub(other);
+    }
+
+    @Override
+    public Vector3d scale(double scalar, Pool pool) {
+        return scale(scalar);
+    }
+
+    @Override
+    public Vector3d negate(Pool pool) {
+        return negate();
+    }
+
+    @Override
+    public Vector3d hadamard(Vector3d other, Pool pool) {
+        return hadamard(other);
+    }
+
+    @Override
+    public Vector3d self_add(Vector3d other, Pool pool) {
+        return self_add(other);
+    }
+
+    @Override
+    public Vector3d self_sub(Vector3d other, Pool pool) {
+        return self_sub(other);
+    }
+
+    @Override
+    public Vector3d self_scale(double scalar, Pool pool) {
+        return self_scale(scalar);
+    }
+
+    @Override
+    public Vector3d self_negate(Pool pool) {
+        return self_negate();
+    }
+
+    @Override
+    public Vector3d self_hadamard(Vector3d other, Pool pool) {
+        return this.self_hadamard(other);
+    }
+
+    @Override
+    public double dot(Vector3d other, Pool pool) {
+        return this.dot(other);
+    }
+
+    @Override
+    protected void scale_partial(Vector3d target, double scalar, int start, int end) {
+        throw new RuntimeException();
+    }
+
+    @Override
+    protected void negate_partial(Vector3d target, int start, int end) {
+        throw new RuntimeException();
+    }
+
+    @Override
+    protected void add_partial(Vector3d target, Vector3d other, int start, int end) {
+        throw new RuntimeException();
+    }
+
+    @Override
+    protected void sub_partial(Vector3d target, Vector3d other, int start, int end) {
+        throw new RuntimeException();
+    }
+
+    @Override
+    protected double dot_partial(Vector3d other, int start, int end) {
+        throw new RuntimeException();
+    }
+
+    @Override
+    protected void outerProduct_partial(DenseMatrix target, Vector3d other, int row) {
+        throw new RuntimeException();
+    }
+
+    @Override
+    protected void hadamard_partial(Vector3d target, Vector3d other, int start, int end) {
+        throw new RuntimeException();
     }
 
 
