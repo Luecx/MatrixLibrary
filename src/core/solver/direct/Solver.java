@@ -139,7 +139,7 @@ public class Solver {
         long startTime = System.currentTimeMillis();
         DenseVector C = preconditioner_jacobi(A);
 
-        DenseVector old_r = new DenseVector(b.sub(A.mul(x_0,p)));
+        DenseVector old_r = new DenseVector(b.sub(A.mul(x_0)));
         DenseVector old_h = C.hadamard(old_r);
         DenseVector old_d = new DenseVector(old_h);
         DenseVector old_x = new DenseVector(x_0);
@@ -152,14 +152,14 @@ public class Solver {
         double e = 1;
         int counter = 1;
         while (e > CONJUGATE_GRADIENT_MAX_ERROR) {
-            DenseVector z = A.mul(old_d, p);
-            a = old_r.dot(old_h,p) / (old_d.dot(z,p));
-            new_x = old_x.add(old_d.scale(a,p));
-            new_r = old_r.sub(z.scale(a,p));
-            new_h = C.hadamard(new_r, p);
-            beta = new_r.dot(new_h,p) / (old_r.dot(old_h,p));
-            new_d = new_h.add(old_d.scale(beta,p));
-            e = new_r.length(p);
+            DenseVector z = A.mul(old_d);
+            a = old_r.dot(old_h) / (old_d.dot(z));
+            new_x = old_x.add(old_d.scale(a));
+            new_r = old_r.sub(z.scale(a));
+            new_h = C.hadamard(new_r);
+            beta = new_r.dot(new_h,p) / (old_r.dot(old_h));
+            new_d = new_h.add(old_d.scale(beta));
+            e = new_r.length();
             System.out.print("\rResiduum: " + e + "    it: " + counter++ + "    time: " +
                     (System.currentTimeMillis() - startTime) + " ms" + "   cores: " + p.getActiveCores());
             old_d = new_d;

@@ -12,9 +12,10 @@ public class PoolLock {
     }
 
     public synchronized void lock()  {
-        this.locked = true;
+        if(this.counter >= threads) return;
         synchronized (this){
             try {
+                this.locked = true;
                 this.wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -40,8 +41,7 @@ public class PoolLock {
 
     public synchronized void unlock() {
         synchronized (this){
-            this.counter ++;
-            //System.out.println(counter);
+            counter++;
             if(this.counter >= this.threads){
                 this.notify();
                 this.locked = false;

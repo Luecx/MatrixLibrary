@@ -45,14 +45,13 @@ public class DenseMatrix extends Matrix<DenseMatrix> {
         return this;
     }
 
-
     @Override
     protected void mul_partial_row(DenseVector target, Vector<?> vec, int row) {
         double v = 0;
         for (int i = 0; i < this.getN(); i++) {
             v += getValue(row, i) * vec.getValue(i);
         }
-        vec.setValue(row, v);
+        target.setValue(row, v);
     }
 
     @Override
@@ -293,20 +292,12 @@ public class DenseMatrix extends Matrix<DenseMatrix> {
 
 
     public static void main(String[] args) {
-        DenseMatrix mat1 = new DenseMatrix(200, 200);
-        mat1.randomise(0, 1);
-        DenseMatrix mat2 = new DenseMatrix(200, 200);
-        mat2.randomise(0, 1);
-        Utilities.measureCores(8, new BiConsumer<Pool, Integer>() {
-            @Override
-            public void accept(Pool pool, Integer v) {
-                if (v == 0) {
-                    mat1.mul(mat2);
-                } else {
-                    pool.setActiveCores(v);
-                    mat1.mul(mat2, pool);
-                }
-            }
-        }, 50);
+        SparseMatrix mat1 = new SparseMatrix(Utilities.generateSymmetricPositiveDefiniteMatrix(HashMatrix.class, 20));
+        Pool pool = new Pool(8);
+
+        for(int i = 0; i < 1000; i++)
+            mat1.mul(new DenseVector(20),pool);
+
+        pool.stop();
     }
 }

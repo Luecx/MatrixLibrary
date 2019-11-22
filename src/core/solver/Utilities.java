@@ -177,16 +177,15 @@ public class Utilities {
     public static void main(String[] args) {
         //measure(5000, DenseMatrix.class, SparseMatrix.class, HashMatrix.class);
 
-        HashMatrix hash = generateSymmetricPositiveDefiniteMatrix(HashMatrix.class, 300000,1230);
+        HashMatrix hash = generateSymmetricPositiveDefiniteMatrix(HashMatrix.class, 20,1230);
         SparseMatrix matrix = new SparseMatrix(hash);
-        DenseVector vector = new DenseVector(300000);
+        DenseVector vector = new DenseVector(20);
         vector.randomise(0,1);
 
         long t = System.currentTimeMillis();
         for(int i = 0; i < 100; i++){
             //Solver.precon_conjugate_gradient(matrix, vector, new DenseVector(vector.getSize()));
-            Solver.conjugate_gradient(matrix, vector, new DenseVector(vector.getSize()));
-
+            Solver.precon_conjugate_gradient(matrix, vector, 4);
         }
         System.out.println(System.currentTimeMillis()-t);
 
