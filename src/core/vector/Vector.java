@@ -309,15 +309,34 @@ public abstract class Vector<T extends Vector<T>> {
     public abstract T newInstance();
 
     public static void main(String[] args) {
-        Pool p = new Pool(4);
-        DenseVector vector = new DenseVector(100000);
-        vector.randomise(1,1);
 
-        //System.out.println(vector.dot_partial(vector, 3,4));
+        DenseVector vec1 = new DenseVector(10000000);
+        DenseVector vec2 = new DenseVector(10000000);
+        vec1.randomise(0,1);
+        vec2.randomise(0,1);
 
-        System.out.println(vector.length());
-        System.out.println(vector.length(p));
 
-        p.stop();
+        Utilities.measureCores(4, (pool, integer) -> {
+            if(integer == 0){
+                vec1.hadamard(vec2);
+            }else{
+                pool.setActiveThreads(integer);
+                vec1.hadamard(vec2, pool);
+            }
+        },10);
+
+//        DenseVector target = new DenseVector(1000000);
+//
+//        long time = System.currentTimeMillis();
+//        for(int i = 0; i < 1000; i++){
+//            vec1.hadamard_partial(target,vec2, 0, 1000000);
+//        }
+//        System.out.println(System.currentTimeMillis() - time);
+//        time = System.currentTimeMillis();
+//        for(int i = 0; i < 1000; i++){
+//            vec1.hadamard_partial(target,vec2, 0, 500000);
+//        }
+//        System.out.println(System.currentTimeMillis() - time);
+
     }
 }
