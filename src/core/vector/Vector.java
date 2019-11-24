@@ -1,13 +1,8 @@
 package core.vector;
 
-import core.matrix.Matrix;
 import core.matrix.dense.DenseMatrix;
-import core.solver.Utilities;
 import core.threads.Pool;
 import core.threads.PoolFunction;
-
-import java.util.Arrays;
-import java.util.function.BiConsumer;
 
 public abstract class Vector<T extends Vector<T>> {
 
@@ -102,10 +97,10 @@ public abstract class Vector<T extends Vector<T>> {
         if (this.getSize() != other.getSize()) throw new RuntimeException();
         T result = newInstance();
         PoolFunction function = index -> {
-            add_partial(result, other, (int) (index * this.getSize() / (double)pool.getActiveCores()),
-                    (int) ((index+1) * this.getSize() / (double)pool.getActiveCores()));
+            add_partial(result, other, (int) (index * this.getSize() / (double)pool.getActiveThreads()),
+                    (int) ((index+1) * this.getSize() / (double)pool.getActiveThreads()));
         };
-        pool.execute(function, pool.getActiveCores());
+        pool.execute(function, pool.getActiveThreads());
         return result;
     }
 
@@ -113,30 +108,30 @@ public abstract class Vector<T extends Vector<T>> {
         if (this.getSize() != other.getSize()) throw new RuntimeException();
         T result = newInstance();
         PoolFunction function = index -> {
-            sub_partial(result, other, (int) (index * this.getSize() / (double)pool.getActiveCores()),
-                    (int) ((index+1) * this.getSize() / (double)pool.getActiveCores()));
+            sub_partial(result, other, (int) (index * this.getSize() / (double)pool.getActiveThreads()),
+                    (int) ((index+1) * this.getSize() / (double)pool.getActiveThreads()));
         };
-        pool.execute(function, pool.getActiveCores());
+        pool.execute(function, pool.getActiveThreads());
         return result;
     }
 
     public T scale(double scalar, Pool pool) {
         T result = newInstance();
         PoolFunction function = index -> {
-            scale_partial(result, scalar, (int) (index * this.getSize() / (double)pool.getActiveCores()),
-                    (int) ((index+1) * this.getSize() / (double)pool.getActiveCores()));
+            scale_partial(result, scalar, (int) (index * this.getSize() / (double)pool.getActiveThreads()),
+                    (int) ((index+1) * this.getSize() / (double)pool.getActiveThreads()));
         };
-        pool.execute(function, pool.getActiveCores());
+        pool.execute(function, pool.getActiveThreads());
         return result;
     }
 
     public T negate(Pool pool) {
         T result = newInstance();
         PoolFunction function = index -> {
-            negate_partial(result, (int) (index * this.getSize() / (double)pool.getActiveCores()),
-                    (int) ((index+1) * this.getSize() / (double)pool.getActiveCores()));
+            negate_partial(result, (int) (index * this.getSize() / (double)pool.getActiveThreads()),
+                    (int) ((index+1) * this.getSize() / (double)pool.getActiveThreads()));
         };
-        pool.execute(function, pool.getActiveCores());
+        pool.execute(function, pool.getActiveThreads());
         return result;
     }
 
@@ -144,71 +139,71 @@ public abstract class Vector<T extends Vector<T>> {
         if (this.getSize() != other.getSize()) throw new RuntimeException();
         T result = newInstance();
         PoolFunction function = index -> {
-            hadamard_partial(result, other, (int) (index * this.getSize() / (double)pool.getActiveCores()),
-                    (int) ((index+1) * this.getSize() / (double)pool.getActiveCores()));
+            hadamard_partial(result, other, (int) (index * this.getSize() / (double)pool.getActiveThreads()),
+                    (int) ((index+1) * this.getSize() / (double)pool.getActiveThreads()));
         };
-        pool.execute(function, pool.getActiveCores());
+        pool.execute(function, pool.getActiveThreads());
         return result;
     }
 
     public T self_add(T other, Pool pool) {
         if (this.getSize() != other.getSize()) throw new RuntimeException();
         PoolFunction function = index -> {
-            add_partial((T) this, other, (int) (index * this.getSize() / (double)pool.getActiveCores()),
-                    (int) ((index+1) * this.getSize() / (double)pool.getActiveCores()));
+            add_partial((T) this, other, (int) (index * this.getSize() / (double)pool.getActiveThreads()),
+                    (int) ((index+1) * this.getSize() / (double)pool.getActiveThreads()));
         };
-        pool.execute(function, pool.getActiveCores());
+        pool.execute(function, pool.getActiveThreads());
         return (T) this;
     }
 
     public T self_sub(T other, Pool pool) {
         if (this.getSize() != other.getSize()) throw new RuntimeException();
         PoolFunction function = index -> {
-            sub_partial((T) this, other, (int) (index * this.getSize() / (double)pool.getActiveCores()),
-                    (int) ((index+1) * this.getSize() / (double)pool.getActiveCores()));
+            sub_partial((T) this, other, (int) (index * this.getSize() / (double)pool.getActiveThreads()),
+                    (int) ((index+1) * this.getSize() / (double)pool.getActiveThreads()));
         };
-        pool.execute(function, pool.getActiveCores());
+        pool.execute(function, pool.getActiveThreads());
         return (T) this;
     }
 
     public T self_scale(double scalar, Pool pool) {
         PoolFunction function = index -> {
-            scale_partial((T) this, scalar,(int) (index * this.getSize() / (double)pool.getActiveCores()),
-                    (int) ((index+1) * this.getSize() / (double)pool.getActiveCores()));
+            scale_partial((T) this, scalar,(int) (index * this.getSize() / (double)pool.getActiveThreads()),
+                    (int) ((index+1) * this.getSize() / (double)pool.getActiveThreads()));
         };
-        pool.execute(function, pool.getActiveCores());
+        pool.execute(function, pool.getActiveThreads());
         return (T) this;
     }
 
     public T self_negate(Pool pool) {
         PoolFunction function = index -> {
-            negate_partial((T) this, (int) (index * this.getSize() / (double)pool.getActiveCores()),
-                    (int) ((index+1) * this.getSize() / (double)pool.getActiveCores()));
+            negate_partial((T) this, (int) (index * this.getSize() / (double)pool.getActiveThreads()),
+                    (int) ((index+1) * this.getSize() / (double)pool.getActiveThreads()));
         };
-        pool.execute(function, pool.getActiveCores());
+        pool.execute(function, pool.getActiveThreads());
         return (T) this;
     }
 
     public T self_hadamard(T other, Pool pool) {
         if (this.getSize() != other.getSize()) throw new RuntimeException();
         PoolFunction function = index -> {
-            hadamard_partial((T) this, other, (int) (index * this.getSize() / (double)pool.getActiveCores()),
-                    (int) ((index+1) * this.getSize() / (double)pool.getActiveCores()));
+            hadamard_partial((T) this, other, (int) (index * this.getSize() / (double)pool.getActiveThreads()),
+                    (int) ((index+1) * this.getSize() / (double)pool.getActiveThreads()));
         };
-        pool.execute(function, pool.getActiveCores());
+        pool.execute(function, pool.getActiveThreads());
         return (T) this;
     }
 
     public double dot(T other, Pool pool) {
         if (this.getSize() != other.getSize()) throw new RuntimeException();
-        final double[] result = new double[pool.getActiveCores()];
+        final double[] result = new double[pool.getActiveThreads()];
         PoolFunction function = index -> {
             result[index] = dot_partial(other,
-                    (int) (index * this.getSize() / (double)pool.getActiveCores()),
-                    (int) ((index+1) * this.getSize() / (double)pool.getActiveCores()));
+                    (int) (index * this.getSize() / (double)pool.getActiveThreads()),
+                    (int) ((index+1) * this.getSize() / (double)pool.getActiveThreads()));
         };
 
-        pool.execute(function, pool.getActiveCores());
+        pool.execute(function, pool.getActiveThreads());
         double s = 0;
         for(double k:result){
             s+=k;

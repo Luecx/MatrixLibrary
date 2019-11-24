@@ -6,11 +6,14 @@ public class PoolThread extends Thread {
 
     private PoolThreadRange counter;
     private PoolFunction function;
+
     private PoolLock lock;
+    private PoolLock initialLock;
 
     private boolean executing = false;
 
-    public PoolThread() {
+    public PoolThread(PoolLock initialLock) {
+        this.initialLock = initialLock;
         this.start();
     }
 
@@ -31,6 +34,7 @@ public class PoolThread extends Thread {
     @Override
     public void run() {
         synchronized (object) {
+            this.initialLock.unlock();
             while (!this.isInterrupted()) {
                 try {
                     object.wait();

@@ -2,17 +2,12 @@ package core.solver.direct;
 
 import core.matrix.Matrix;
 import core.matrix.dense.DenseMatrix;
-import core.matrix.sparse_matrix.HashMatrix;
-import core.matrix.sparse_matrix.SparseMatrix;
-import core.solver.Utilities;
 import core.solver.decomposition.CholeskyDecomposition;
 import core.solver.decomposition.QRDecomposition;
 import core.threads.Pool;
-import core.vector.Vector;
 import core.vector.DenseVector;
+import visuals.Printer;
 
-import java.util.HashMap;
-import java.util.Random;
 import java.util.function.Function;
 
 
@@ -130,6 +125,9 @@ public class Solver {
         return sol;
     }
 
+
+
+
     public static DenseVector precon_conjugate_gradient(Matrix<?> A, DenseVector b, int cores) {
         return precon_conjugate_gradient(A, b, new DenseVector(b.getSize()), cores);
     }
@@ -139,8 +137,8 @@ public class Solver {
         long startTime = System.currentTimeMillis();
         DenseVector C = preconditioner_jacobi(A);
 
-        DenseVector old_r = new DenseVector(b.sub(A.mul(x_0)));
-        DenseVector old_h = C.hadamard(old_r);
+        DenseVector old_r = new DenseVector(b.sub(A.mul(x_0,p)));
+        DenseVector old_h = C.hadamard(old_r,p);
         DenseVector old_d = new DenseVector(old_h);
         DenseVector old_x = new DenseVector(x_0);
         DenseVector new_r;
@@ -152,57 +150,69 @@ public class Solver {
         double e = 1;
         int counter = 1;
         while (e > CONJUGATE_GRADIENT_MAX_ERROR) {
-            DenseVector z = A.mul(old_d);
-            a = old_r.dot(old_h) / (old_d.dot(z));
-            new_x = old_x.add(old_d.scale(a));
-            new_r = old_r.sub(z.scale(a));
-            new_h = C.hadamard(new_r);
-            beta = new_r.dot(new_h,p) / (old_r.dot(old_h));
-            new_d = new_h.add(old_d.scale(beta));
-            e = new_r.length();
-            System.out.print("\rResiduum: " + e + "    it: " + counter++ + "    time: " +
-                    (System.currentTimeMillis() - startTime) + " ms" + "   cores: " + p.getActiveCores());
+            DenseVector z = A.mul(old_d,p);
+            a = old_r.dot(old_h,p) / (old_d.dot(z,p));
+            new_x = old_x.add(old_d.scale(a,p),p);
+            new_r = old_r.sub(z.scale(a,p),p);
+            new_h = C.hadamard(new_r,p);
+            beta = new_r.dot(new_h,p) / (old_r.dot(old_h,p));
+            new_d = new_h.add(old_d.scale(beta,p),p);
+
             old_d = new_d;
             old_x = new_x;
             old_h = new_h;
             old_r = new_r;
+
+            counter ++;
+            e = new_r.length(p);
+            Printer.print_conjugateGradient(e, counter, System.currentTimeMillis()-startTime, cores);
+
         }
         p.stop();
         System.out.println();
         return old_x;
     }
 
-    public static DenseVector conjugate_gradient(Matrix<?> A, DenseVector b) {
-        return conjugate_gradient(A, b, new DenseVector(A.getM()));
+    public static DenseVector conjugate_gradient(Matrix<?> A, DenseVector b, int cores) {
+        return conjugate_gradient(A, b, new DenseVector(A.getM()), cores);
     }
 
-    public static DenseVector conjugate_gradient(Matrix<?> A, DenseVector b, DenseVector x_0) {
+    public static DenseVector conjugate_gradient(Matrix<?> A, DenseVector b, DenseVector x_0, int cores) {
         long startTime = System.currentTimeMillis();
+        Pool pool = new Pool(cores);
+
         DenseVector old_x = new DenseVector(x_0);
         DenseVector new_x;
-        DenseVector old_p = (DenseVector) b.sub(A.mul(old_x));
+        DenseVector old_p = b.sub(A.mul(old_x,pool),pool);
         DenseVector new_p;
         DenseVector old_r = new DenseVector(old_p);
         DenseVector new_r;
+
         double a, beta;
         double e = 1;
         int counter = 1;
         while (e > CONJUGATE_GRADIENT_MAX_ERROR) {
-            a = old_r.dot(old_r) / (old_p.dot(A.mul(old_p)));
-            new_x = old_x.add(old_p.scale(a));
-            new_r = old_r.sub(A.mul(old_p).scale(a));
-            beta = new_r.dot(new_r) / old_r.dot(old_r);
-            new_p = new_r.add(old_p.scale(beta));
-            e = Math.sqrt(new_r.dot(new_r));
-            System.out.print("\rResiduum: " + e + "    it: " + counter++ + "    time: " +
-                    (System.currentTimeMillis() - startTime) + " ms" + "   cores: " + 1);
+            a = old_r.dot(old_r,pool) / (old_p.dot(A.mul(old_p,pool),pool));
+            new_x = old_x.add(old_p.scale(a,pool),pool);
+            new_r = old_r.sub(A.mul(old_p,pool).scale(a,pool),pool);
+            beta = new_r.dot(new_r,pool) / old_r.dot(old_r,pool);
+            new_p = new_r.add(old_p.scale(beta,pool));
+
             old_p = new_p;
             old_r = new_r;
             old_x = new_x;
+
+            e = new_r.length(pool);
+            Printer.print_conjugateGradient(e, counter, System.currentTimeMillis()-startTime, cores);
+            counter ++;
+
         }
         System.out.println();
         return old_x;
     }
+
+
+
 
     public static DenseVector gauss_newton(Function<DenseVector, DenseVector> function, Function<DenseVector, DenseMatrix> derivative, DenseVector start, int recalculation) {
         double e = 1;
@@ -217,7 +227,7 @@ public class Solver {
             Matrix transpose = der.transpose();
             Matrix leftSide = transpose.mul(der);
             DenseVector rightSide = transpose.mul(function.apply(x));
-            DenseVector dx = conjugate_gradient(leftSide, rightSide);
+            DenseVector dx = conjugate_gradient(leftSide, rightSide,1);
             x.self_sub(dx.scale(alpha_k));
             e = dx.length();
             System.err.println(x);

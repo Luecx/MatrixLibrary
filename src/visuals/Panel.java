@@ -131,7 +131,7 @@ public class Panel extends JPanel {
 
 
         for (double x = start_x; x <= end_x; x += w_x) {
-            g.setStroke(Math.abs(x) < 0.0001 ? full : dashed);
+            g.setStroke(Math.abs(x) < 1E-14 ? full : dashed);
             int screen_x = (int) toScreenSpace(new Vector2d(x, 0)).getX();
             g.drawLine(screen_x, 0, screen_x, this.getHeight());
             String num = "" + BigDecimal.valueOf(x).setScale(-power, RoundingMode.HALF_UP).doubleValue();
@@ -139,7 +139,7 @@ public class Panel extends JPanel {
 
         }
         for (double y = start_y; y <= end_y; y += w_x) {
-            g.setStroke(Math.abs(y) < 0.0001 ? full : dashed);
+            g.setStroke(Math.abs(y) < 1E-14 ? full : dashed);
             int screen_y = (int) toScreenSpace(new Vector2d(0, y)).getY();
             g.drawLine(0, screen_y, this.getWidth(), screen_y);
             String num = "" + BigDecimal.valueOf(y).setScale(-power, RoundingMode.HALF_UP).doubleValue();
