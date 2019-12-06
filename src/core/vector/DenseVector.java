@@ -45,35 +45,35 @@ public class DenseVector extends Vector<DenseVector> {
     }
 
     @Override
-    protected void scale_partial(DenseVector target, double scalar, int start, int end) {
+    public void scale_partial(DenseVector target, double scalar, int start, int end) {
         for (int i = start; i < end; i++) {
             target.setValue(i, getValue(i) * scalar);
         }
     }
 
     @Override
-    protected void negate_partial(DenseVector target, int start, int end) {
+    public void negate_partial(DenseVector target, int start, int end) {
         for (int i = start; i < end; i++) {
             target.setValue(i, -getValue(i));
         }
     }
 
     @Override
-    protected void add_partial(DenseVector target, DenseVector other, int start, int end) {
+    public void add_partial(DenseVector target, DenseVector other, int start, int end) {
         for (int i = start; i < end; i++) {
             target.setValue(i, other.getValue(i) + getValue(i));
         }
     }
 
     @Override
-    protected void sub_partial(DenseVector target, DenseVector other, int start, int end) {
+    public void sub_partial(DenseVector target, DenseVector other, int start, int end) {
         for (int i = start; i < end; i++) {
             target.setValue(i, getValue(i) - other.getValue(i));
         }
     }
 
     @Override
-    protected double dot_partial(DenseVector other, int start, int end) {
+    public double dot_partial(DenseVector other, int start, int end) {
         double k = 0;
         for (int i = start; i < end; i++) {
             k += getValue(i) * other.getValue(i);
@@ -82,7 +82,7 @@ public class DenseVector extends Vector<DenseVector> {
     }
 
     @Override
-    protected void outerProduct_partial(DenseMatrix target, DenseVector other, int row) {
+    public void outerProduct_partial(DenseMatrix target, DenseVector other, int row) {
         if(this.getValue(row) != 0){
             for(int n = 0; n < other.getSize(); n++){
                 target.setValue(row,n,this.getValue(row) * other.getValue(n));
@@ -91,7 +91,7 @@ public class DenseVector extends Vector<DenseVector> {
     }
 
     @Override
-    protected void hadamard_partial(DenseVector target, DenseVector other, int start, int end) {
+    public void hadamard_partial(DenseVector target, DenseVector other, int start, int end) {
         for (int i = start; i < end; i++) {
             target.setValue(i, getValue(i) * other.getValue(i));
         }

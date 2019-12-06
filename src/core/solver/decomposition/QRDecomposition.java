@@ -25,7 +25,6 @@ public class QRDecomposition<T extends Matrix<T>> {
         double v1,v2;
         for(int i = 1; i < matrix.getM(); i++){
             for(int n = 0; n < Math.min(i, matrix.getN()); n++){
-
                 if(R.getValue(i,n) != 0){
                     v1 = R.getValue(n,n);
                     v2 = R.getValue(i,n);

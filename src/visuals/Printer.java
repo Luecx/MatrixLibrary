@@ -9,7 +9,7 @@ public class Printer {
         int sec = (int) ((millis / 1000) % 60);
         int mil = (int) (millis % 1000);
 
-        System.out.format("\rres: %5.3E  it: %-6d time[m,s,ms]: %02d:%02d:%04d  cores: %4d",
+        System.out.format("\rres: %5.3E  it: %-6d time[m,s,ms]: %02d:%02d:%03d  cores: %4d",
                 res,
                 iteration,
                 min,

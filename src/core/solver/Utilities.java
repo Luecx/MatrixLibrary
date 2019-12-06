@@ -4,6 +4,7 @@ import core.matrix.Matrix;
 import core.matrix.dense.DenseMatrix;
 import core.matrix.sparse_matrix.HashMatrix;
 import core.matrix.sparse_matrix.SparseMatrix;
+import core.solver.decomposition.CholeskyDecomposition;
 import core.solver.direct.Solver;
 import core.threads.Pool;
 import core.vector.DenseVector;
@@ -175,19 +176,30 @@ public class Utilities {
     }
 
     public static void main(String[] args) {
-        //measure(5000, DenseMatrix.class, SparseMatrix.class, HashMatrix.class);
 
-        HashMatrix hash = generateSymmetricPositiveDefiniteMatrix(HashMatrix.class, 20,1230);
-        SparseMatrix matrix = new SparseMatrix(hash);
-        DenseVector vector = new DenseVector(20);
+
+//        measure(5000, DenseMatrix.class, SparseMatrix.class);
+//        System.out.println();
+//        measure(5000, DenseMatrix.class, SparseMatrix.class);
+//        System.out.println();
+//        measure(5000, DenseMatrix.class, SparseMatrix.class);
+//        System.out.println();
+//        measure(5000, DenseMatrix.class, SparseMatrix.class);
+//        System.out.println();
+//        measure(10000, DenseMatrix.class, SparseMatrix.class);
+//        System.out.println();
+
+        DenseMatrix matrix = generateSymmetricPositiveDefiniteMatrix(DenseMatrix.class, 3000,1230);
+        DenseVector vector = new DenseVector(3000);
         vector.randomise(0,1);
 
         long t = System.currentTimeMillis();
-        for(int i = 0; i < 100; i++){
-            //Solver.precon_conjugate_gradient(matrix, vector, new DenseVector(vector.getSize()));
-            Solver.precon_conjugate_gradient(matrix, vector, 4);
-        }
-        System.out.println(System.currentTimeMillis()-t);
+        Solver.precon_conjugate_gradient(matrix, vector, 1);
+        System.out.println("conjugate gradient: " + (System.currentTimeMillis()-t));
+
+        t = System.currentTimeMillis();
+        CholeskyDecomposition.decomposeGGT(matrix);
+        System.out.println("cholesky: " + (System.currentTimeMillis()-t));
 
         //Solver.conjugate_gradient(matrix, vector);
 

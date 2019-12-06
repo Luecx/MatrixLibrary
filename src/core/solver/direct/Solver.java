@@ -2,6 +2,8 @@ package core.solver.direct;
 
 import core.matrix.Matrix;
 import core.matrix.dense.DenseMatrix;
+import core.matrix.sparse_matrix.SparseMatrix;
+import core.solver.Utilities;
 import core.solver.decomposition.CholeskyDecomposition;
 import core.solver.decomposition.QRDecomposition;
 import core.threads.Pool;
@@ -208,10 +210,52 @@ public class Solver {
 
         }
         System.out.println();
+        pool.stop();
         return old_x;
     }
 
+    public static DenseVector conjugate_gradient_normal_equation(Matrix<?> A, DenseVector b, int cores) {
+        return conjugate_gradient_normal_equation(A, b, new DenseVector(A.getN()), cores);
+    }
 
+    public static DenseVector conjugate_gradient_normal_equation(Matrix<?> A, DenseVector b, DenseVector x_0, int cores) {
+        long startTime = System.currentTimeMillis();
+        Pool pool = new Pool(cores);
+
+        Matrix<?> A_T = A.transpose();
+        b = A_T.mul(b,pool);
+
+        DenseVector old_x = new DenseVector(x_0);
+        DenseVector new_x;
+        DenseVector old_p = b.sub(A_T.mul(A.mul(old_x,pool)),pool);
+        DenseVector new_p;
+        DenseVector old_r = new DenseVector(old_p);
+        DenseVector new_r;
+
+        double a, beta;
+        double e = 1;
+        int counter = 1;
+        while (e > CONJUGATE_GRADIENT_MAX_ERROR) {
+            a = old_r.dot(old_r,pool) / (old_p.dot(
+                    A_T.mul(A.mul(old_p,pool),pool),pool));
+            new_x = old_x.add(old_p.scale(a,pool),pool);
+            new_r = old_r.sub(A_T.mul(A.mul(old_p,pool),pool).scale(a,pool),pool);
+            beta = new_r.dot(new_r,pool) / old_r.dot(old_r,pool);
+            new_p = new_r.add(old_p.scale(beta,pool));
+
+            old_p = new_p;
+            old_r = new_r;
+            old_x = new_x;
+
+            e = new_r.length(pool);
+            Printer.print_conjugateGradient(e, counter, System.currentTimeMillis()-startTime, cores);
+            counter ++;
+
+        }
+        System.out.println();
+        pool.stop();
+        return old_x;
+    }
 
 
     public static DenseVector gauss_newton(Function<DenseVector, DenseVector> function, Function<DenseVector, DenseMatrix> derivative, DenseVector start, int recalculation) {
@@ -255,33 +299,25 @@ public class Solver {
     }
 
     public static void main(String[] args) {
-        double nodes[] = new double[]{1, 2, 3};
-        double times[] = new double[]{1, Math.pow(2, 3d / 2), Math.pow(3, 3d / 2)};
-        Function<DenseVector, DenseVector> function = new Function<DenseVector, DenseVector>() {
-            @Override
-            public DenseVector apply(DenseVector vector) {
-                DenseVector out = new DenseVector(nodes.length);
-                for (int i = 0; i < nodes.length; i++) {
-                    out.setValue(i, Math.pow(nodes[i], vector.getValue(0)) - times[i]);
-                }
-                return out;
-            }
-        };
-        Function<DenseVector, DenseMatrix> der = new Function<DenseVector, DenseMatrix>() {
-            @Override
-            public DenseMatrix apply(DenseVector vector) {
-                DenseMatrix out = new DenseMatrix(nodes.length, 1);
-                for (int i = 0; i < nodes.length; i++) {
-                    double expo = Math.pow(nodes[i], vector.getValue(0));
-                    out.setValue(i, 0, -expo * Math.log(vector.getValue(0)));
-                }
-                return out;
-            }
-        };
-        DenseVector init = new DenseVector(3d / 2d);
-        System.out.println(function.apply(new DenseVector(3d / 2d)));
-        DenseVector solution = gauss_newton(function, der, init);
-        System.out.println(solution);
-//        System.out.println(function.apply(solution));
+        DenseMatrix matrix = Utilities.generateSymmetricPositiveDefiniteMatrix(DenseMatrix.class, 5000);
+        DenseVector vector = new DenseVector(5000);
+        vector.randomise(0,1);
+
+        long time = System.currentTimeMillis();
+        for(int i = 0; i < 1; i++){
+            CholeskyDecomposition.decomposeGGT(matrix);
+        }
+        System.out.println((System.currentTimeMillis()-time) / 10d);
+        time = System.currentTimeMillis();
+        for(int i = 0; i < 1; i++){
+            conjugate_gradient(matrix, vector,1);
+        }
+        System.out.println((System.currentTimeMillis()-time) / 10d);
+        time = System.currentTimeMillis();
+
+        for(int i = 0; i < 1; i++){
+            matrix.transpose();
+        }
+        System.out.println((System.currentTimeMillis()-time) / 10d);
     }
 }

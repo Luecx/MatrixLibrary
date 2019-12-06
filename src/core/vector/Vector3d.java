@@ -252,37 +252,37 @@ public class Vector3d extends Vector<Vector3d> {
     }
 
     @Override
-    protected void scale_partial(Vector3d target, double scalar, int start, int end) {
+    public void scale_partial(Vector3d target, double scalar, int start, int end) {
         throw new RuntimeException();
     }
 
     @Override
-    protected void negate_partial(Vector3d target, int start, int end) {
+    public void negate_partial(Vector3d target, int start, int end) {
         throw new RuntimeException();
     }
 
     @Override
-    protected void add_partial(Vector3d target, Vector3d other, int start, int end) {
+    public void add_partial(Vector3d target, Vector3d other, int start, int end) {
         throw new RuntimeException();
     }
 
     @Override
-    protected void sub_partial(Vector3d target, Vector3d other, int start, int end) {
+    public void sub_partial(Vector3d target, Vector3d other, int start, int end) {
         throw new RuntimeException();
     }
 
     @Override
-    protected double dot_partial(Vector3d other, int start, int end) {
+    public double dot_partial(Vector3d other, int start, int end) {
         throw new RuntimeException();
     }
 
     @Override
-    protected void outerProduct_partial(DenseMatrix target, Vector3d other, int row) {
+    public void outerProduct_partial(DenseMatrix target, Vector3d other, int row) {
         throw new RuntimeException();
     }
 
     @Override
-    protected void hadamard_partial(Vector3d target, Vector3d other, int start, int end) {
+    public void hadamard_partial(Vector3d target, Vector3d other, int start, int end) {
         throw new RuntimeException();
     }
 

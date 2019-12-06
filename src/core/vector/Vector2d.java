@@ -223,37 +223,37 @@ public class Vector2d extends Vector<Vector2d> {
     }
 
     @Override
-    protected void scale_partial(Vector2d target, double scalar, int start, int end) {
+    public void scale_partial(Vector2d target, double scalar, int start, int end) {
         throw new RuntimeException();
     }
 
     @Override
-    protected void negate_partial(Vector2d target, int start, int end) {
+    public void negate_partial(Vector2d target, int start, int end) {
         throw new RuntimeException();
     }
 
     @Override
-    protected void add_partial(Vector2d target, Vector2d other, int start, int end) {
+    public void add_partial(Vector2d target, Vector2d other, int start, int end) {
         throw new RuntimeException();
     }
 
     @Override
-    protected void sub_partial(Vector2d target, Vector2d other, int start, int end) {
+    public void sub_partial(Vector2d target, Vector2d other, int start, int end) {
         throw new RuntimeException();
     }
 
     @Override
-    protected double dot_partial(Vector2d other, int start, int end) {
+    public double dot_partial(Vector2d other, int start, int end) {
         throw new RuntimeException();
     }
 
     @Override
-    protected void outerProduct_partial(DenseMatrix target, Vector2d other, int row) {
+    public void outerProduct_partial(DenseMatrix target, Vector2d other, int row) {
         throw new RuntimeException();
     }
 
     @Override
-    protected void hadamard_partial(Vector2d target, Vector2d other, int start, int end) {
+    public void hadamard_partial(Vector2d target, Vector2d other, int start, int end) {
         throw new RuntimeException();
     }
 

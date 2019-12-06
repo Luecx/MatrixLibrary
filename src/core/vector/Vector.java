@@ -289,19 +289,19 @@ public abstract class Vector<T extends Vector<T>> {
         return dot_partial(other, 0, this.getSize());
     }
 
-    protected abstract void scale_partial(T target, double scalar, int start, int end);
+    public abstract void scale_partial(T target, double scalar, int start, int end);
 
-    protected abstract void negate_partial(T target, int start, int end);
+    public abstract void negate_partial(T target, int start, int end);
 
-    protected abstract void add_partial(T target, T other, int start, int end);
+    public abstract void add_partial(T target, T other, int start, int end);
 
-    protected abstract void sub_partial(T target, T other, int start, int end);
+    public abstract void sub_partial(T target, T other, int start, int end);
 
-    protected abstract double dot_partial(T other, int start, int end);
+    public abstract double dot_partial(T other, int start, int end);
 
-    protected abstract void outerProduct_partial(DenseMatrix target, T other, int row);
+    public abstract void outerProduct_partial(DenseMatrix target, T other, int row);
 
-    protected abstract void hadamard_partial(T target, T other, int start, int end);
+    public abstract void hadamard_partial(T target, T other, int start, int end);
 
 
     public abstract T copy();

@@ -167,11 +167,11 @@ public abstract class Matrix<T extends Matrix<T>> {
         return (T)this;
     }
 
-    protected abstract void mul_partial_row(DenseVector target, Vector<?> vec, int row);
-    protected abstract void mul_partial_row(DenseMatrix target, Matrix<?> matrix, int row);
-    protected abstract void scale_partial_row(T target, double scalar, int row);
-    protected abstract void add_partial_row(T target, T matrix, int row);
-    protected abstract void sub_partial_row(T target, T matrix, int row);
+    public abstract void mul_partial_row(DenseVector target, Vector<?> vec, int row);
+    public abstract void mul_partial_row(DenseMatrix target, Matrix<?> matrix, int row);
+    public abstract void scale_partial_row(T target, double scalar, int row);
+    public abstract void add_partial_row(T target, T matrix, int row);
+    public abstract void sub_partial_row(T target, T matrix, int row);
 
     public abstract T transpose();
     public abstract T self_transpose();

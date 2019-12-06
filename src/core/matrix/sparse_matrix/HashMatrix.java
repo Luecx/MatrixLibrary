@@ -39,7 +39,7 @@ public class HashMatrix extends Matrix<HashMatrix> {
     }
 
     @Override
-    protected void mul_partial_row(DenseVector target, Vector<?> vec, int row) {
+    public void mul_partial_row(DenseVector target, Vector<?> vec, int row) {
         double v = 0;
         for (int i = 0; i < this.getN(); i++) {
             v += getValue(row, i) * vec.getValue(i);
@@ -48,7 +48,7 @@ public class HashMatrix extends Matrix<HashMatrix> {
     }
 
     @Override
-    protected void mul_partial_row(DenseMatrix target, Matrix<?> matrix, int row) {
+    public void mul_partial_row(DenseMatrix target, Matrix<?> matrix, int row) {
         for (int j = 0; j < matrix.getN(); j++) {
             double sum = 0;
             for (int k = 0; k < this.getN(); k++) {
@@ -59,21 +59,21 @@ public class HashMatrix extends Matrix<HashMatrix> {
     }
 
     @Override
-    protected void add_partial_row(HashMatrix target, HashMatrix matrix, int row) {
+    public void add_partial_row(HashMatrix target, HashMatrix matrix, int row) {
         for (int i = 0; i < this.getN(); i++) {
             target.setValue(row, i, target.getValue(row, i) + matrix.getValue(row, i));
         }
     }
 
     @Override
-    protected void sub_partial_row(HashMatrix target, HashMatrix matrix, int row) {
+    public void sub_partial_row(HashMatrix target, HashMatrix matrix, int row) {
         for (int i = 0; i < this.getN(); i++) {
             target.setValue(row, i, target.getValue(row, i) - matrix.getValue(row, i));
         }
     }
 
     @Override
-    protected void scale_partial_row(HashMatrix target, double scalar, int row) {
+    public void scale_partial_row(HashMatrix target, double scalar, int row) {
         for(Integer i:rows[row].keySet()){
             this.rows[row].put(i, this.rows[row].get(i) * scalar);
         }

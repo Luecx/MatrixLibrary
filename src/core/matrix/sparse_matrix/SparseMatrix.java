@@ -95,7 +95,7 @@ public class SparseMatrix extends Matrix<SparseMatrix> {
 
 
     @Override
-    protected void scale_partial_row(SparseMatrix target, double scalar, int row) {
+    public void scale_partial_row(SparseMatrix target, double scalar, int row) {
         for (int n = row_ptr.get(row); n < row_ptr.get(row + 1); n++) {
             val.set(n, val.get(n) * scalar);
         }
@@ -152,7 +152,12 @@ public class SparseMatrix extends Matrix<SparseMatrix> {
 
     @Override
     public SparseMatrix transpose() {
-        throw new NotSupportedOperation();
+        HashMatrix hashMatrix = new HashMatrix(this.getN(), this.getM());
+        for(int i = 0; i < this.getM(); i++){
+            for (int n = row_ptr.get(i); n < row_ptr.get(i + 1); n++) {
+                hashMatrix.setValue(col_index.get(n), i, val.get(n));
+            }
+        }return new SparseMatrix(hashMatrix);
     }
 
     @Override
