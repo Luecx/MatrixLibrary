@@ -3,6 +3,7 @@ package core.tensor;
 import core.exceptions.NotMatchingSlotsException;
 import core.matrix.dense.DenseMatrix;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -160,10 +161,18 @@ public class Tensor {
     }
 
     public static void main(String[] args) {
-        Tensor t = new Tensor(4, 4, 4);
-        t.set(3, 1, 0, 2);
-        t.transpose(0, 2);
-        System.out.println(t.get(1, 0, 2));
-        System.out.println(t.get(2, 0, 1));
+
+        double[][] ar = new double[][]{
+
+                {1,2},
+                {3,4},
+                {3,4}
+        };
+
+        Tensor2D t1 = new Tensor2D(ar);
+        Tensor3D t2 = new Tensor3D(t1);
+        System.out.println(t2.get(0,1,0));
+
+
     }
 }

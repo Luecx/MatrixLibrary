@@ -26,7 +26,9 @@ public enum ColorPalette {
     }
 
     public void drawColorPalette(Graphics2D graphics2D, double min, double max, int subd, int height) {
-        graphics2D.clearRect(0,0,130,height+ 60);
+        graphics2D.setColor(Color.white);
+        graphics2D.fillRect(0,0,130,height+ 60);
+
         int cell = (int)(height / (double)subd);
         int counter = 0;
         for(double i = 1; i >= 0; i-= 1d/(subd-1)){

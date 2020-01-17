@@ -9,6 +9,28 @@ public class Tensor3D extends Tensor {
         updatePartialDimensions();
     }
 
+    public Tensor3D(Tensor2D... tensors) {
+        this.dimensions = new int[3];
+        this.dimensions[0] = tensors.length;
+        this.dimensions[1] = tensors[0].dimensions[0];
+        this.dimensions[2] = tensors[0].dimensions[1];
+
+        this.partialDimensions = new int[]{1, this.dimensions[0], this.dimensions[1] * this.dimensions[0]};
+
+        this.size = this.dimensions[0] * this.dimensions[1] * this.dimensions[2];
+        this.data = new double[size];
+
+        updatePartialDimensions();
+        for(int i = 0; i < this.dimensions[0]; i++){
+            for(int n = 0; n < this.dimensions[1]; n++){
+                for(int j = 0; j < this.dimensions[2]; j++){
+                    this.data[index(i,n,j)] = tensors[i].get(n,j);
+                }
+            }
+        }
+    }
+
+
     public Tensor3D(double[] data, int d1, int d2, int d3) {
         super(data, d1, d2, d3);
         updatePartialDimensions();
@@ -52,18 +74,18 @@ public class Tensor3D extends Tensor {
 
 
     public String toString() {
-        String s = new String();
+        StringBuilder builder = new StringBuilder();
         for (int i = 0; i < this.getDimension(0); i++) {
             for (int n = 0; n < this.getDimension(1); n++) {
                 for (int j = 0; j < this.getDimension(2); j++) {
                     //s+=((String.format("%.3E",this.getValue(i,n)) + "              ").substring(0,10) + "  ");
-                    s += ((this.get(i, n, j) + "             ").substring(0, 10) + "  ");
+                    builder.append((this.get(i, n, j) + "             ").substring(0, 10) + "  ");
                 }
-                s += "\n";
+                builder.append("\n");
             }
-            s += "\n";
-            s += "\n";
+            builder.append("\n");
+            builder.append("\n");
         }
-        return s;
+        return builder.toString();
     }
 }

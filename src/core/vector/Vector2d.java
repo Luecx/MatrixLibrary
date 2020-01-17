@@ -3,6 +3,8 @@ package core.vector;
 import core.matrix.dense.DenseMatrix;
 import core.threads.Pool;
 
+import java.util.Objects;
+
 public class Vector2d extends Vector<Vector2d> {
 
     private double x,y;
@@ -29,8 +31,8 @@ public class Vector2d extends Vector<Vector2d> {
     @Override
     public void setValue(int index, double val) {
         switch (index){
-            case 0: x=val;
-            case 1: y=val;
+            case 0: x=val; break;
+            case 1: y=val; break;
         }
     }
 
@@ -273,5 +275,20 @@ public class Vector2d extends Vector<Vector2d> {
         double n_x = x * Math.cos(radians) - Math.sin(radians) * y;
         double n_y = x * Math.sin(radians) + Math.cos(radians) * y;
         return new Vector2d(n_x, n_y);
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Vector2d vector2d = (Vector2d) o;
+        return Double.compare(vector2d.x, x) == 0 &&
+                Double.compare(vector2d.y, y) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y);
     }
 }
