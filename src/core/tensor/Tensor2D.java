@@ -1,5 +1,7 @@
 package core.tensor;
 
+import java.util.Arrays;
+
 public class Tensor2D extends Tensor{
 
     int pd1,pd2;
@@ -7,6 +9,22 @@ public class Tensor2D extends Tensor{
     public Tensor2D(Tensor2D tensor) {
         super(tensor);
         updatePartialDimensions();
+    }
+
+    public Tensor2D(double[][] data){
+        this.dimensions = new int[2];
+        this.dimensions[0] = data.length;
+        this.dimensions[1] = data[0].length;
+        this.partialDimensions = new int[]{1,this.dimensions[0]};
+        this.size = this.dimensions[0] * this.dimensions[1];
+        this.data = new double[size];
+        updatePartialDimensions();
+
+        for(int i = 0; i < this.dimensions[0]; i++){
+            for(int n = 0; n < this.dimensions[1]; n++){
+                this.data[index(i,n)] = data[i][n];
+            }
+        }
     }
 
     public Tensor2D(double[] data, int d1, int d2) {
@@ -49,6 +67,15 @@ public class Tensor2D extends Tensor{
         this.pd2 = partialDimensions[1];
     }
 
-
-
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < this.getDimension(0); i++) {
+            for (int n = 0; n < this.getDimension(1); n++) {
+                builder.append((this.get(i, n) + "             ").substring(0, 10) + "  ");
+            }
+            builder.append("\n");
+        }
+        return builder.toString();
+    }
 }

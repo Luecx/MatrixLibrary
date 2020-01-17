@@ -20,7 +20,7 @@ public abstract class Vector<T extends Vector<T>> {
     }
 
     public Vector(Vector<?> other, int size) {
-        this.size = other.size;
+        this.size = size;
         genArrays();
         other.loadTo(this);
     }

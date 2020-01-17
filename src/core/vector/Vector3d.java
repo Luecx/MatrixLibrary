@@ -3,6 +3,8 @@ package core.vector;
 import core.matrix.dense.DenseMatrix;
 import core.threads.Pool;
 
+import java.util.Objects;
+
 public class Vector3d extends Vector<Vector3d> {
 
     private double x,y,z;
@@ -27,12 +29,18 @@ public class Vector3d extends Vector<Vector3d> {
 
     }
 
+    public static void main(String[] args) {
+
+        Vector2d vec1 = new Vector2d(4,3);
+        System.out.println(new Vector3d(vec1));
+    }
+
     @Override
     public void setValue(int index, double val) {
         switch (index){
-            case 0: x=val;
-            case 1: y=val;
-            case 2: z=val;
+            case 0: x=val; break;
+            case 1: y=val; break;
+            case 2: z=val; break;
         }
     }
 
@@ -286,5 +294,18 @@ public class Vector3d extends Vector<Vector3d> {
         throw new RuntimeException();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Vector3d vector3d = (Vector3d) o;
+        return Double.compare(vector3d.x, x) == 0 &&
+                Double.compare(vector3d.y, y) == 0 &&
+                Double.compare(vector3d.z, z) == 0;
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y, z);
+    }
 }
