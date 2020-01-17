@@ -10,15 +10,12 @@ public enum Preconditioner {
 
 
     None(null,null),
-    Jacobian(null, new Function<Matrix, Vector>() {
-        @Override
-        public Vector apply(Matrix matrix) {
-            DenseVector result = new DenseVector(matrix.getM());
-            for (int i = 0; i < matrix.getN(); i++) {
-                result.setValue(i, 1 / matrix.getValue(i, i));
-            }
-            return new DenseVector(result);
+    Jacobian(null, matrix -> {
+        DenseVector result = new DenseVector(matrix.getM());
+        for (int i = 0; i < matrix.getN(); i++) {
+            result.setValue(i, 1 / matrix.getValue(i, i));
         }
+        return new DenseVector(result);
     }),
     ;
 

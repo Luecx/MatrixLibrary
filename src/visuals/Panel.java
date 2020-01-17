@@ -9,6 +9,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Collection;
 
 public class Panel extends JPanel {
 
@@ -112,6 +113,45 @@ public class Panel extends JPanel {
         g.drawString(s, r.x + a, r.y + b);
     }
 
+    protected static void draw_triangle_gradient(Graphics2D g2d, Polygon triangle, Color color1, Color color2, Color color3){
+
+        Vector2d p1 = new Vector2d(triangle.xpoints[0], triangle.ypoints[0]);
+        Vector2d p2 = new Vector2d(triangle.xpoints[1], triangle.ypoints[1]);
+        Vector2d p3 = new Vector2d(triangle.xpoints[2], triangle.ypoints[2]);
+        Vector2d t1 = getPerpendicularPointOnLine(p2,p3,p1);
+        Vector2d t2 = getPerpendicularPointOnLine(p3,p1,p2);
+        Vector2d t3 = getPerpendicularPointOnLine(p1,p2,p3);
+
+        Color empty = new Color(0,0,0,1);
+
+        GradientPaint gradientPaint1 = new GradientPaint(
+                (int)p1.getX(), (int)p1.getY(), color1,
+                (int)t1.getX(), (int)t1.getY(), empty);
+        GradientPaint gradientPaint2 = new GradientPaint(
+                (int)p2.getX(), (int)p2.getY(), color2,
+                (int)t2.getX(), (int)t2.getY(), empty);
+        GradientPaint gradientPaint3 = new GradientPaint(
+                (int)p3.getX(), (int)p3.getY(), color3,
+                (int)t3.getX(), (int)t3.getY(), empty);
+
+        g2d.setPaint(gradientPaint1);
+        g2d.fillPolygon(triangle);
+        g2d.setPaint(gradientPaint2);
+        g2d.fillPolygon(triangle);
+        g2d.setPaint(gradientPaint3);
+        g2d.fillPolygon(triangle);
+    }
+
+    protected static Vector2d getPerpendicularPointOnLine(Vector2d lineP1, Vector2d lineP2, Vector2d point){
+        double k = ((lineP2.getY()-lineP1.getY()) * (point.getX()-lineP1.getX()) -
+                (lineP2.getX()-lineP1.getX()) * (point.getY()-lineP1.getY())) /
+                ((lineP2.getY()-lineP1.getY()) * (lineP2.getY()-lineP1.getY()) +
+                        (lineP2.getX()-lineP1.getX()) * (lineP2.getX()-lineP1.getX()));
+        double x4 = point.getX() - k * (lineP2.getY()-lineP1.getY());
+        double y4 = point.getY() + k * (lineP2.getX()-lineP1.getX());
+        return new Vector2d(x4,y4);
+    }
+
     protected void draw_grid(Graphics2D g) {
         int power = (int) Math.floor(Math.log10(scale.getX())) - 1;
         double w_x = Math.pow(10, power);
@@ -147,6 +187,33 @@ public class Panel extends JPanel {
 
         }
 
+    }
+
+    public static void main(String[] args) {
+
+        Panel panel = new Panel(){
+            @Override
+            protected void paintComponent(Graphics g) {
+                g.clearRect(0,0,this.getWidth(), this.getHeight());
+                Polygon polygon = new Polygon();
+                polygon.addPoint(100,100);
+                polygon.addPoint(700,200);
+                polygon.addPoint(200,700);
+                polygon.addPoint(100,100);
+                draw_triangle_gradient((Graphics2D) g, polygon, Color.GREEN, Color.red, Color.blue);
+            }
+        };
+
+
+        JFrame frame = new JFrame();
+
+        frame.setDefaultCloseOperation(2);
+        frame.setLayout(new BorderLayout());
+        frame.add(panel);
+        frame.setSize(800,800);
+
+
+        frame.setVisible(true);
     }
 
 }

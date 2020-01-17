@@ -1,6 +1,7 @@
 package core.vector;
 
 import core.matrix.dense.DenseMatrix;
+import core.solver.Utilities;
 import core.threads.Pool;
 import core.threads.PoolFunction;
 
