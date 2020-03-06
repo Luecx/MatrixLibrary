@@ -122,7 +122,10 @@ public class Panel extends JPanel {
         Vector2d t2 = getPerpendicularPointOnLine(p3,p1,p2);
         Vector2d t3 = getPerpendicularPointOnLine(p1,p2,p3);
 
-        Color empty = new Color(0,0,0,1);
+//        t1 = t1.add(t1.sub(p1).scale(-0.3));
+//        t2 = t2.add(t2.sub(p2).scale(-0.3));
+//        t3 = t3.add(t3.sub(p3).scale(-0.3));
+        Color empty = new Color(0,0,0,0);
 
         GradientPaint gradientPaint1 = new GradientPaint(
                 (int)p1.getX(), (int)p1.getY(), color1,
@@ -133,6 +136,17 @@ public class Panel extends JPanel {
         GradientPaint gradientPaint3 = new GradientPaint(
                 (int)p3.getX(), (int)p3.getY(), color3,
                 (int)t3.getX(), (int)t3.getY(), empty);
+
+//        Composite old = g2d.getComposite();
+//        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR, 1));
+        g2d.setColor(new Color(
+                (color1.getRed() + color2.getRed() + color3.getRed())/3,
+                (color1.getGreen() + color2.getGreen() + color3.getGreen())/3,
+                (color1.getBlue() + color2.getBlue() + color3.getBlue())/3,
+                255
+        ));
+        g2d.fillPolygon(triangle);
+        //g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1));
 
         g2d.setPaint(gradientPaint1);
         g2d.fillPolygon(triangle);
@@ -191,29 +205,42 @@ public class Panel extends JPanel {
 
     public static void main(String[] args) {
 
-        Panel panel = new Panel(){
-            @Override
-            protected void paintComponent(Graphics g) {
-                g.clearRect(0,0,this.getWidth(), this.getHeight());
-                Polygon polygon = new Polygon();
-                polygon.addPoint(100,100);
-                polygon.addPoint(700,200);
-                polygon.addPoint(200,700);
-                polygon.addPoint(100,100);
-                draw_triangle_gradient((Graphics2D) g, polygon, Color.GREEN, Color.red, Color.blue);
-            }
-        };
+        for(int i = 0; i < 1; i++){
+            int finalI = i;
+            Panel panel = new Panel(){
+                @Override
+                protected void paintComponent(Graphics g) {
+                    g.clearRect(0,0,this.getWidth(), this.getHeight());
+                    g.setColor(finalI == 0 ? Color.red:Color.red);
+//                    g.fillRect(0,0,this.getWidth(), this.getHeight());
+//                    g.setColor(Color.black);
+//                    g.drawLine(0,300,1000,400);
+
+                    Polygon polygon = new Polygon();
+                    polygon.addPoint(100,100);
+                    polygon.addPoint(700,400);
+                    polygon.addPoint(400,700);
+                    polygon.addPoint(100,100);
+                    draw_triangle_gradient((Graphics2D) g, polygon, Color.RED, Color.GREEN, Color.BLUE);
+
+                    Polygon polygon2 = new Polygon();
+                    polygon2.addPoint(100,100);
+                    polygon2.addPoint(700,400);
+                    polygon2.addPoint(800,30);
+                    polygon2.addPoint(100,100);
+                    draw_triangle_gradient((Graphics2D) g, polygon2, Color.RED, Color.GREEN, Color.BLUE);
+                }
+            };
 
 
-        JFrame frame = new JFrame();
+            JFrame frame = new JFrame();
+            frame.setDefaultCloseOperation(2);
+            frame.setLayout(new BorderLayout());
+            frame.add(panel);
+            frame.setSize(800,800);
+            frame.setVisible(true);
+        }
 
-        frame.setDefaultCloseOperation(2);
-        frame.setLayout(new BorderLayout());
-        frame.add(panel);
-        frame.setSize(800,800);
-
-
-        frame.setVisible(true);
     }
 
 }

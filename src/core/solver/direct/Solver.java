@@ -16,9 +16,9 @@ import java.util.function.Function;
 public class Solver {
 
 
-    public static final double GAUSS_NEWTON_MAX_ERROR = 1E-14;
-    public static final double CONJUGATE_GRADIENT_MAX_ERROR = 1E-14;
-    public static final double EIGENVALUE_ITERARTION_MAX_ERROR = 1E-14;
+    public static double GAUSS_NEWTON_MAX_ERROR = 1E-14;
+    public static double CONJUGATE_GRADIENT_MAX_ERROR = 1E-14;
+    public static double EIGENVALUE_ITERARTION_MAX_ERROR = 1E-14;
 
     public static DenseVector gaussian() {
         //
