@@ -122,9 +122,9 @@ public class Panel extends JPanel {
         Vector2d t2 = getPerpendicularPointOnLine(p3,p1,p2);
         Vector2d t3 = getPerpendicularPointOnLine(p1,p2,p3);
 
-//        t1 = t1.add(t1.sub(p1).scale(-0.3));
-//        t2 = t2.add(t2.sub(p2).scale(-0.3));
-//        t3 = t3.add(t3.sub(p3).scale(-0.3));
+//        t1 = t1.add(t1.sub(p1).self_scale(-0.3));
+//        t2 = t2.add(t2.sub(p2).self_scale(-0.3));
+//        t3 = t3.add(t3.sub(p3).self_scale(-0.3));
         Color empty = new Color(0,0,0,0);
 
         GradientPaint gradientPaint1 = new GradientPaint(
@@ -176,8 +176,8 @@ public class Panel extends JPanel {
         double end_x = Math.floor((toWorldSpace(new Vector2d(this.getWidth(),this.getHeight())).getX()) / w_x) * w_x;
         double start_y = Math.floor((toWorldSpace(new Vector2d(this.getWidth(),this.getHeight())).getY()) / w_x) * w_x;
 
-//        double end_x = Math.floor((center.getX() + scale.getX() / 2) / w_x) * w_x + w_x;
-//        double end_y = Math.floor((center.getY() + scale.getY() / 2) / w_x) * w_x + w_x;
+//        double end_x = Math.floor((center.getX() + self_scale.getX() / 2) / w_x) * w_x + w_x;
+//        double end_y = Math.floor((center.getY() + self_scale.getY() / 2) / w_x) * w_x + w_x;
 
         Stroke dashed = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 1, new float[]{1}, 0);
         Stroke full = new BasicStroke(2);

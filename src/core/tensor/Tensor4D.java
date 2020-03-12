@@ -18,6 +18,35 @@ public class Tensor4D extends Tensor{
         updatePartialDimensions();
     }
 
+    public Tensor4D(Tensor3D... tensors){
+        this.dimensions = new int[4];
+        this.dimensions[0] = tensors.length;
+        this.dimensions[1] = tensors[0].dimensions[0];
+        this.dimensions[2] = tensors[0].dimensions[1];
+        this.dimensions[3] = tensors[0].dimensions[2];
+
+        this.partialDimensions = new int[]{
+                1,
+                this.dimensions[0],
+                this.dimensions[1] * this.dimensions[0],
+                this.dimensions[2] * this.dimensions[1] * this.dimensions[0]};
+
+        this.size = this.dimensions[0] * this.dimensions[1] * this.dimensions[2] * this.dimensions[3];
+        this.data = new double[size];
+
+        updatePartialDimensions();
+        for(int i = 0; i < this.dimensions[0]; i++){
+            for(int n = 0; n < this.dimensions[1]; n++){
+                for(int j = 0; j < this.dimensions[2]; j++){
+                    for(int k = 0; k < this.dimensions[3]; k++){
+                        this.data[index(i,n,j,k)] = tensors[i].get(n,j,k);
+
+                    }
+                }
+            }
+        }
+    }
+
     public Tensor4D(int d1, int d2, int d3, int d4) {
         super(d1,d2,d3,d4);
         updatePartialDimensions();

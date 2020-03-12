@@ -1,9 +1,7 @@
 package core.tensor;
 
 import core.exceptions.NotMatchingSlotsException;
-import core.matrix.dense.DenseMatrix;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -123,11 +121,38 @@ public class Tensor {
         data[index] += val;
     }
 
-    public void normalise() {
-        this.scale(1d / max());
+    public void add(double val){
+        for(int i = 0; i < size; i++){
+            data[i] += val;
+        }
     }
 
-    public void scale(double scalar) {
+    public void self_add(Tensor other){
+        for(int i = 0; i < Math.min(other.size, size); i++){
+            data[i] += other.data[i];
+        }
+    }
+
+    public void self_hadamard(Tensor other){
+        for(int i = 0; i < Math.min(other.size, size); i++){
+            data[i] *= other.data[i];
+        }
+    }
+
+    public void self_sub(Tensor other){
+        for(int i = 0; i < Math.min(other.size, size); i++){
+            data[i] -= other.data[i];
+        }
+    }
+
+    public void self_normalise() {
+        double min = min();
+        double max = max();
+        this.add(-min);
+        this.self_scale(1d / (max-min));
+    }
+
+    public void self_scale(double scalar) {
         for(int i = 0; i < this.size; i++){
             data[i] *= scalar;
         }
@@ -170,8 +195,8 @@ public class Tensor {
         };
 
         Tensor2D t1 = new Tensor2D(ar);
-        Tensor3D t2 = new Tensor3D(t1);
-        System.out.println(t2.get(0,1,0));
+        t1.self_normalise();
+        System.out.println(t1);
 
 
     }
