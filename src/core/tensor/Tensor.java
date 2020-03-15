@@ -88,9 +88,12 @@ public class Tensor {
             this.data = data;
     }
 
-
     public int getDimension(int dimension){
         return dimensions[dimension];
+    }
+
+    public int[] getDimensions(){
+        return Arrays.copyOf(dimensions, dimensions.length);
     }
 
     public void randomizeRegular(double min, double max) {
