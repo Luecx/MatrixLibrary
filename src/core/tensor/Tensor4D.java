@@ -2,9 +2,10 @@ package core.tensor;
 
 import core.exceptions.NotMatchingSlotsException;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
-public class Tensor4D extends Tensor{
+public class Tensor4D extends Tensor implements Serializable {
 
     int pd1,pd2,pd3,pd4;
 

@@ -64,7 +64,7 @@ public class Panel extends JPanel {
         this.center.self_add(dp);
     }
 
-    protected static void draw_arrow(Graphics2D g2d, Vector2d start, Vector2d end, int width, int arrow_width, int arrow_length) {
+    public static void draw_arrow(Graphics2D g2d, Vector2d start, Vector2d end, int width, int arrow_width, int arrow_length) {
         Polygon arrowPolygon = new Polygon();
 
         double ptDistance = (int) end.sub(start).length();
@@ -89,7 +89,7 @@ public class Panel extends JPanel {
         g2d.fill(transform.createTransformedShape(arrowPolygon));
     }
 
-    protected static void draw_centered_string(Graphics2D g, String s, int x, int y, Font font) {
+    public static void draw_centered_string(Graphics2D g, String s, int x, int y, Font font) {
         FontRenderContext frc = new FontRenderContext(null, true, true);
         Rectangle2D r2D = font.getStringBounds(s, frc);
 
@@ -97,7 +97,7 @@ public class Panel extends JPanel {
         g.drawString(s, x - (int) (r2D.getWidth() / 2), y + (int) (r2D.getHeight() / 3));
     }
 
-    protected static void draw_centered_string(Graphics2D g, String s, Rectangle r, Font font) {
+    public static Rectangle2D draw_centered_string(Graphics2D g, String s, Rectangle r, Font font) {
         FontRenderContext frc = new FontRenderContext(null, true, true);
 
         Rectangle2D r2D = font.getStringBounds(s, frc);
@@ -111,9 +111,17 @@ public class Panel extends JPanel {
 
         g.setFont(font);
         g.drawString(s, r.x + a, r.y + b);
+        return r2D;
     }
 
-    protected static void draw_triangle_gradient(Graphics2D g2d, Polygon triangle, Color color1, Color color2, Color color3){
+    public static Rectangle2D get_centered_string_bounds(String s, Font font){
+        FontRenderContext frc = new FontRenderContext(null, true, true);
+
+        Rectangle2D r2D = font.getStringBounds(s, frc);
+        return r2D;
+    }
+
+    public static void draw_triangle_gradient(Graphics2D g2d, Polygon triangle, Color color1, Color color2, Color color3){
 
         Vector2d p1 = new Vector2d(triangle.xpoints[0], triangle.ypoints[0]);
         Vector2d p2 = new Vector2d(triangle.xpoints[1], triangle.ypoints[1]);
@@ -156,7 +164,7 @@ public class Panel extends JPanel {
         g2d.fillPolygon(triangle);
     }
 
-    protected static Vector2d getPerpendicularPointOnLine(Vector2d lineP1, Vector2d lineP2, Vector2d point){
+    public static Vector2d getPerpendicularPointOnLine(Vector2d lineP1, Vector2d lineP2, Vector2d point){
         double k = ((lineP2.getY()-lineP1.getY()) * (point.getX()-lineP1.getX()) -
                 (lineP2.getX()-lineP1.getX()) * (point.getY()-lineP1.getY())) /
                 ((lineP2.getY()-lineP1.getY()) * (lineP2.getY()-lineP1.getY()) +

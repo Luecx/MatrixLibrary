@@ -42,8 +42,8 @@ public abstract class Matrix<T extends Matrix<T>> {
         if(vec.getSize() != this.getN()) throw new RuntimeException();
 
         DenseVector target = new DenseVector(this.getM());
-        PoolFunction function = index -> mul_partial_row(target, vec, index);
-        pool.execute(function, this.getM());
+        PoolFunction function = (index, core) -> mul_partial_row(target, vec, index);
+        pool.executeTotal(function, this.getM(), false);
 
         return target;
     }
@@ -51,59 +51,59 @@ public abstract class Matrix<T extends Matrix<T>> {
         if(mat.getM() != this.getN()) throw new RuntimeException();
 
         DenseMatrix target = new DenseMatrix(this.getM(), mat.getN());
-        PoolFunction function = index -> {
+        PoolFunction function = (index, core) -> {
             mul_partial_row(target, mat, index);
         };
-        pool.execute(function, this.getM());
+        pool.executeTotal(function, this.getM(),false);
         return target;
     }
     public T scale(double scalar, Pool pool){
         T target = this.newInstance();
-        PoolFunction function = index -> {
+        PoolFunction function = (index, core) -> {
             scale_partial_row(target, scalar,index);
         };
-        pool.execute(function, this.getM());
+        pool.executeTotal(function, this.getM(),false);
         return target;
     }
     public T self_scale(double scalar, Pool pool){
-        PoolFunction function = index -> {
+        PoolFunction function = (index, core) -> {
             scale_partial_row((T)this, scalar,index);
         };
-        pool.execute(function, this.getM());
+        pool.executeTotal(function, this.getM(),false);
         return (T) this;
     }
     public T add(T other, Pool pool){
         if(this.getM() != other.getM() || this.getN() != other.getN()) throw new RuntimeException();
         T target = this.newInstance();
-        PoolFunction function = index -> {
+        PoolFunction function = (index, core) -> {
             add_partial_row(target, other, index);
         };
-        pool.execute(function, this.getM());
+        pool.executeTotal(function, this.getM(),false);
         return target;
     }
     public T self_add(T other, Pool pool){
         if(this.getM() != other.getM() || this.getN() != other.getN()) throw new RuntimeException();
-        PoolFunction function = index -> {
+        PoolFunction function = (index, core) -> {
             add_partial_row((T)this, other, index);
         };
-        pool.execute(function, this.getM());
+        pool.executeTotal(function, this.getM(), false);
         return (T)this;
     }
     public T sub(T other, Pool pool){
         if(this.getM() != other.getM() || this.getN() != other.getN()) throw new RuntimeException();
         T target = this.newInstance();
-        PoolFunction function = index -> {
+        PoolFunction function = (index, core) -> {
             sub_partial_row(target, other, index);
         };
-        pool.execute(function, this.getM());
+        pool.executeTotal(function, this.getM(), false);
         return target;
     }
     public T self_sub(T other, Pool pool){
         if(this.getM() != other.getM() || this.getN() != other.getN()) throw new RuntimeException();
-        PoolFunction function = index -> {
+        PoolFunction function = (index, core) -> {
             sub_partial_row((T)this, other, index);
         };
-        pool.execute(function, this.getM());
+        pool.executeTotal(function, this.getM(), false);
         return (T)this;
     }
 

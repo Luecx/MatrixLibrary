@@ -1,6 +1,8 @@
 package core.tensor;
 
-public class Tensor3D extends Tensor {
+import java.io.Serializable;
+
+public class Tensor3D extends Tensor implements Serializable {
 
     int pd1, pd2, pd3;
 
@@ -79,7 +81,9 @@ public class Tensor3D extends Tensor {
             for (int n = 0; n < this.getDimension(1); n++) {
                 for (int j = 0; j < this.getDimension(2); j++) {
                     //s+=((String.format("%.3E",this.getValue(i,n)) + "              ").substring(0,10) + "  ");
-                    builder.append((this.get(i, n, j) + "             ").substring(0, 10) + "  ");
+                    builder.append((String.format("%-+12.3E", this.get(i, n,j))));
+
+                    //builder.append((this.get(i, n, j) + "             ").substring(0, 10) + "  ");
                 }
                 builder.append("\n");
             }

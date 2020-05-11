@@ -19,7 +19,6 @@ public class DenseMatrix extends Matrix<DenseMatrix> {
 
     private double[][] values;
 
-
     public DenseMatrix(int m, int n) {
         super(m, n);
         values = new double[m][n];
@@ -255,15 +254,16 @@ public class DenseMatrix extends Matrix<DenseMatrix> {
 
     @Override
     public String toString() {
-        String s = new String();
+        StringBuilder builder = new StringBuilder();
         for (int i = 0; i < this.getM(); i++) {
             for (int n = 0; n < this.getN(); n++) {
-                //s+=((String.format("%.3E",this.getValue(i,n)) + "              ").substring(0,10) + "  ");
-                s += ((this.getValue(i, n) + "                                  ").substring(0, 10) + "  ");
+
+                //builder.append(getValue(i,n));
+                builder.append(String.format("%-8.3f ", getValue(i,n)));
             }
-            s += "\n";
+            builder.append("\n");
         }
-        return s;
+        return builder.toString();
     }
 
     public String toString(int c) {
@@ -292,12 +292,15 @@ public class DenseMatrix extends Matrix<DenseMatrix> {
 
 
     public static void main(String[] args) {
-        SparseMatrix mat1 = new SparseMatrix(Utilities.generateSymmetricPositiveDefiniteMatrix(HashMatrix.class, 20));
-        Pool pool = new Pool(8);
+//        SparseMatrix mat1 = new SparseMatrix(Utilities.generateSymmetricPositiveDefiniteMatrix(HashMatrix.class, 20));
+////        Pool pool = new Pool(8);
+////
+////        for(int i = 0; i < 1000; i++)
+////            mat1.mul(new DenseVector(20),pool);
+////
+////        pool.stop();
+        DenseMatrix denseMatrix = new DenseMatrix(4,4);
+        System.out.println(denseMatrix);
 
-        for(int i = 0; i < 1000; i++)
-            mat1.mul(new DenseVector(20),pool);
-
-        pool.stop();
     }
 }

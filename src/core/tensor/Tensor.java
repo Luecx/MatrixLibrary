@@ -2,10 +2,13 @@ package core.tensor;
 
 import core.exceptions.NotMatchingSlotsException;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
-public class Tensor {
+public class Tensor implements Serializable {
 
     protected double[] data;
 
@@ -32,6 +35,14 @@ public class Tensor {
             size *= dimensions[i];
         }
         this.data = data;
+    }
+
+    /**
+     * 1D tensor
+     * @param data
+     */
+    public Tensor(double... data) {
+        this(data, data.length);
     }
 
     public Tensor(int... dimensions) {
@@ -130,35 +141,83 @@ public class Tensor {
         }
     }
 
-    public void self_add(Tensor other){
+
+    public Tensor self_apply(Function<Double, Double> consumer){
+        for(int i = 0; i < data.length; i++){
+            data[i] = consumer.apply(data[i]);
+        }
+        return this;
+    }
+
+    public Tensor self_add(Tensor other){
         for(int i = 0; i < Math.min(other.size, size); i++){
             data[i] += other.data[i];
         }
+        return this;
     }
 
-    public void self_hadamard(Tensor other){
+    public Tensor self_hadamard(Tensor other){
         for(int i = 0; i < Math.min(other.size, size); i++){
             data[i] *= other.data[i];
         }
+        return this;
     }
 
-    public void self_sub(Tensor other){
+    public Tensor self_sub(Tensor other){
         for(int i = 0; i < Math.min(other.size, size); i++){
             data[i] -= other.data[i];
         }
+        return this;
     }
 
-    public void self_normalise() {
+    public Tensor self_negate(){
+        this.self_scale(-1);
+        return this;
+    }
+
+    public Tensor self_normalise() {
         double min = min();
         double max = max();
         this.add(-min);
         this.self_scale(1d / (max-min));
+        return this;
     }
 
-    public void self_scale(double scalar) {
+    public Tensor self_scale(double scalar) {
         for(int i = 0; i < this.size; i++){
             data[i] *= scalar;
         }
+        return this;
+    }
+
+
+
+    public Tensor apply(Function<Double, Double> consumer){
+        return new Tensor(this).self_apply(consumer);
+    }
+
+    public Tensor add(Tensor other){
+        return new Tensor(this).self_add(other);
+    }
+
+    public Tensor hadamard(Tensor other){
+        return new Tensor(this).self_hadamard(other);
+    }
+
+    public Tensor sub(Tensor other){
+        return new Tensor(this).self_sub(other);
+    }
+
+    public Tensor negate(){
+        return new Tensor(this).self_negate();
+    }
+
+    public Tensor normalise() {
+        return new Tensor(this).self_normalise();
+    }
+
+    public Tensor scale(double scalar) {
+        return new Tensor(this).self_scale(scalar);
     }
 
     public double min() {

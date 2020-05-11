@@ -1,8 +1,9 @@
 package core.tensor;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
-public class Tensor2D extends Tensor{
+public class Tensor2D extends Tensor implements Serializable {
 
     int pd1,pd2;
 
@@ -72,7 +73,7 @@ public class Tensor2D extends Tensor{
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < this.getDimension(0); i++) {
             for (int n = 0; n < this.getDimension(1); n++) {
-                builder.append((this.get(i, n) + "             ").substring(0, 10) + "  ");
+                builder.append((String.format("%-+12.3E", this.get(i, n))));
             }
             builder.append("\n");
         }
